@@ -75,3 +75,25 @@ Phase 6 analyzes measured telemetry and generates explainable, advisory bottlene
 
 The verified Phase 6 assessment is recorded in [docs/PHASE6_RESULTS.md](docs/PHASE6_RESULTS.md).
 
+## Phase 7 — Predicted-vs-Actual Validation
+
+Phase 7 adds validation infrastructure that keeps ML predictions separate from measured PostgreSQL observations. A validation run stores a prediction, executes the identical `WorkloadConfig` through the Phase 2 runner, collects Phase 3 telemetry, links the resulting `experiment_id`, and calculates absolute/percentage errors. Failed predictions, unavailable PostgreSQL, missing telemetry, and invalid configurations are persisted as `FAILED` records with diagnostics; no synthetic performance labels are created.
+
+Initialize the new table before using the CLI:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+python scripts/initialize_database.py
+python scripts/validate_prediction.py --scenario NORMAL_DAY --concurrency 10 --target-tps 10 --duration 10 --output artifacts/validation.json
+python scripts/run_validation_suite.py --scenarios NORMAL_DAY SALARY_DAY --duration 10 --output artifacts/validation-summary.json
+python scripts/run_benchmark.py --scenarios NORMAL_DAY SALARY_DAY --duration 10 --format csv --output artifacts/benchmark.csv
+```
+
+The safe suite defaults to two scenarios, 10 concurrent workers, 10 TPS, and one 10-second repetition. Increase duration, repetitions, or workload intensity explicitly when collecting more evidence. The API exposes `POST /api/validation`, `GET /api/validation`, `GET /api/validation/{validation_id}`, and `GET /api/validation/summary`.
+
+`run_benchmark.py` is the model-independent benchmark path. It executes real PostgreSQL workloads and exports measured experiment results, so it can be used before a complete model set exists.
+
+Validation metrics are reported only for completed runs with both predicted and actual values. MAE, RMSE, R², and MAPE are omitted or set to null when their inputs are unavailable or mathematically undefined (for example, percentage error with an actual value of zero). See [docs/PHASE7_VALIDATION.md](docs/PHASE7_VALIDATION.md).
+
+The first measured Phase 7 result is recorded in [docs/PHASE7_RESULTS.md](docs/PHASE7_RESULTS.md). It completed successfully, but showed material prediction error: 49.75% for average latency, 66.52% for P95 latency, 20.57% for throughput, and 50.54% for host CPU. These are preliminary results from one real validation configuration, not statistically meaningful overall accuracy claims.
+

@@ -155,3 +155,25 @@ CREATE TABLE IF NOT EXISTS experiment_summaries (
     host_cpu_avg_percent NUMERIC(10,4), host_memory_avg_percent NUMERIC(10,4), db_size_before_bytes BIGINT, db_size_after_bytes BIGINT,
     telemetry_sample_count INTEGER NOT NULL DEFAULT 0, telemetry_error_count INTEGER NOT NULL DEFAULT 0, generated_at TIMESTAMPTZ NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS validation_experiments (
+    validation_id UUID PRIMARY KEY,
+    prediction_id UUID NOT NULL UNIQUE,
+    actual_experiment_id UUID REFERENCES experiment_runs(experiment_id) ON DELETE SET NULL,
+    scenario VARCHAR(40) NOT NULL,
+    workload_configuration JSONB NOT NULL,
+    model_version JSONB,
+    prediction_timestamp TIMESTAMPTZ NOT NULL,
+    execution_timestamp TIMESTAMPTZ,
+    predicted_metrics JSONB,
+    actual_metrics JSONB,
+    error_metrics JSONB,
+    validation_status VARCHAR(20) NOT NULL CHECK (validation_status IN ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED')),
+    error_message TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    completed_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_validation_experiments_status ON validation_experiments(validation_status);
+CREATE INDEX IF NOT EXISTS idx_validation_experiments_scenario ON validation_experiments(scenario);
+CREATE INDEX IF NOT EXISTS idx_validation_experiments_actual_experiment ON validation_experiments(actual_experiment_id);
