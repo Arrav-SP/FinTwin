@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
-import pandas as pd
 from sqlalchemy import text
 
 from ..database import engine
@@ -24,6 +23,7 @@ class DatasetReport:
 
 
 def load_experiments() -> pd.DataFrame:
+    import pandas as pd
     query = text("""
         SELECT e.experiment_id, e.scenario, e.configuration, e.status,
                e.started_at, e.completed_at, e.requested_operations,
@@ -60,4 +60,3 @@ def quality_report(frame: pd.DataFrame, telemetry_count: int) -> DatasetReport:
     usable = completed.dropna(subset=[target for target in TARGETS if target in completed]) if not completed.empty else completed
     missing = {target: int(completed[target].isna().sum()) for target in TARGETS if target in completed}
     return DatasetReport(len(frame), len(completed), len(usable), int(completed["configuration_key"].nunique()) if not completed.empty else 0, int(completed["scenario"].nunique()) if not completed.empty else 0, telemetry_count, missing)
-

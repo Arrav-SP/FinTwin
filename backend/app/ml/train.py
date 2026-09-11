@@ -2,25 +2,32 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from sqlalchemy import text
 
-import joblib
-from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import GroupShuffleSplit
-from sklearn.pipeline import Pipeline
-
+from ..database import engine
 from .dataset import TARGETS, load_experiments, quality_report
-from .features import make_preprocessor
 
 
 def diagnose() -> dict:
-    frame, telemetry_count = load_experiments()
-    report = quality_report(frame, telemetry_count)
-    return {"total_experiments": report.total_experiments, "completed_experiments": report.completed_experiments, "usable_experiments": report.usable_experiments, "unique_configurations": report.unique_configurations, "unique_scenarios": report.unique_scenarios, "telemetry_samples": report.telemetry_samples, "missing_targets": report.missing_targets, "target_columns": TARGETS}
+    with engine.connect() as connection:
+        total = connection.execute(text("SELECT COUNT(*) FROM experiment_runs")).scalar_one()
+        completed = connection.execute(text("SELECT COUNT(*) FROM experiment_runs WHERE status = 'COMPLETED'")).scalar_one()
+        summaries = connection.execute(text("SELECT COUNT(*) FROM experiment_summaries")).scalar_one()
+        samples = connection.execute(text("SELECT COUNT(*) FROM telemetry_samples")).scalar_one()
+        scenarios = connection.execute(text("SELECT COUNT(DISTINCT scenario) FROM experiment_runs WHERE status = 'COMPLETED'")).scalar_one()
+        configs = connection.execute(text("SELECT COUNT(DISTINCT configuration::text) FROM experiment_runs WHERE status = 'COMPLETED'")).scalar_one()
+    return {"total_experiments": total, "completed_experiments": completed, "usable_experiments": summaries, "unique_configurations": configs, "unique_scenarios": scenarios, "telemetry_samples": samples, "missing_targets": {}, "target_columns": TARGETS}
 
 
 def train_models(output_dir: Path = Path("artifacts/models")) -> dict:
+    import joblib
+    from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+    from sklearn.linear_model import LinearRegression
+    from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+    from sklearn.model_selection import GroupShuffleSplit
+    from sklearn.pipeline import Pipeline
+    from .features import make_preprocessor
+
     frame, telemetry_count = load_experiments()
     report = quality_report(frame, telemetry_count)
     if report.usable_experiments < 6 or report.unique_configurations < 4 or report.unique_scenarios < 2:
