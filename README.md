@@ -67,3 +67,5 @@ python scripts/what_if.py --scenario NORMAL_DAY --concurrency 50 --target-tps 10
 python scripts/what_if.py --scenario NORMAL_DAY --concurrency 50 --target-tps 100 --sweep-concurrency 25 50 75 100 --output-csv artifacts/concurrency-sweep.csv
 ```
 
+The measured Phase 5 what-if outputs are recorded in [docs/PHASE5_RESULTS.md](docs/PHASE5_RESULTS.md).
+
