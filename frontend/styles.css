@@ -42,3 +42,54 @@ button { color: inherit; }
 @media (max-width: 1120px) { .kpi-grid { grid-template-columns:repeat(3,1fr); }.form-grid { grid-template-columns:repeat(2,1fr); } }
 @media (max-width: 840px) { .app-shell { grid-template-columns:1fr; }.sidebar { position:static; height:auto; padding:14px 16px 10px; border-right:0; border-bottom:1px solid var(--line); }.brand { padding:3px 0 12px; }.nav-list { grid-template-columns:repeat(3,1fr); }.nav-item { padding:9px 7px; font-size:11px; }.nav-item span { display:none; }.sidebar-status { display:none; }.topbar { padding:0 18px; }.content { padding:24px 18px 36px; }.two-col, .whatif-grid { grid-template-columns:1fr; }.status-grid { grid-template-columns:1fr; }.kpi-grid { grid-template-columns:repeat(2,1fr); }.page-hero { align-items:flex-start; flex-direction:column; }.page-hero h2 { font-size:27px; }.result-grid { grid-template-columns:repeat(2,1fr); } }
 @media (max-width: 480px) { .nav-list { grid-template-columns:repeat(2,1fr); }.kpi-grid, .form-grid { grid-template-columns:1fr; }.topbar { height:68px; }.live-status { display:none; }.content { padding:20px 14px; }.result-grid { grid-template-columns:1fr; } }
+
+/* Refined surfaces: hierarchy comes from spacing and type before decoration. */
+body { background: var(--bg); }
+.sidebar { background: #0d1218; }
+.brand-mark { background: var(--teal); box-shadow: none; }
+.nav-item.active { background: rgba(84,209,189,.07); border-color: rgba(84,209,189,.2); }
+.topbar { background: rgba(9,12,17,.92); backdrop-filter: blur(8px); }
+.page-hero { margin-bottom: 24px; }
+.page-hero p { max-width: 660px; }
+.card, .status-card { background: #10151d; box-shadow: none; border-color: rgba(183,204,231,.1); }
+.action-button { background: var(--teal); box-shadow: none; }
+.action-button:hover { filter: brightness(1.05); }
+.eyebrow { letter-spacing: .08em; }
+.whatif-workspace { max-width: 1080px; }
+.whatif-intro { padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.whatif-intro .section-head { margin-bottom: 0; }
+.whatif-grid { gap: 0; border-bottom: 1px solid var(--line); }
+.whatif-config { padding: 24px 28px 28px 0; }
+.whatif-config + .whatif-config { padding-right: 0; padding-left: 28px; border-left: 1px solid var(--line); }
+.whatif-config h3 { margin: 0; font-size: 18px; letter-spacing: -.3px; }
+.whatif-config > p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+.whatif-config .form-grid { margin-top: 22px; }
+.whatif-action { display: flex; align-items: center; justify-content: flex-end; gap: 18px; padding: 20px 0 4px; }
+.whatif-action .action-button { padding-inline: 16px; }
+.whatif-results { margin-top: 38px; padding-top: 20px; border-top: 1px solid var(--line); }
+.results-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+.results-heading h3 { margin: 0; font-size: 17px; }
+.results-heading p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+.results-heading > strong { color: var(--teal); font-size: 12px; font-weight: 650; }
+.delta-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.delta-list .metric-delta { min-height: 112px; padding: 18px 20px 18px 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
+.delta-list .metric-delta:nth-child(even) { padding-left: 20px; border-left: 1px solid var(--line); }
+.delta-name { color: var(--text); font-size: 13px; }
+.delta-values { gap: 12px; margin-top: 15px; }
+.delta-values span:not(.delta-arrow) { color: var(--muted); font-size: 11px; }
+.delta-values b { display: block; margin-top: 4px; color: var(--text); font-size: 20px; }
+.delta-arrow { color: var(--teal); }
+.delta-change { margin-top: 10px; }
+
+@media (max-width: 840px) {
+  .nav-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .whatif-config, .whatif-config + .whatif-config { padding: 22px 0; border-left: 0; }
+  .whatif-config + .whatif-config { border-top: 1px solid var(--line); }
+  .whatif-action { justify-content: space-between; }
+}
+@media (max-width: 520px) {
+  .whatif-action { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .whatif-action .action-button { width: 100%; }
+  .delta-list { grid-template-columns: 1fr; }
+  .delta-list .metric-delta, .delta-list .metric-delta:nth-child(even) { padding: 16px 0; border-left: 0; }
+}

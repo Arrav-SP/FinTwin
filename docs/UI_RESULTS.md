@@ -78,6 +78,20 @@ Passed:
 
 The full test suite was attempted but collection was blocked by an existing machine-level NumPy DLL/Application Control policy error while importing the ML/What-If test path. No frontend failure caused that error.
 
+## UI refinement pass
+
+The second visual pass reduced the generated-dashboard feel without changing application architecture or API contracts:
+
+- Reframed What-If Analysis as an open comparison workspace rather than a card containing cards.
+- Replaced dense metric boxes with divider-led baseline/What-If comparisons.
+- Reduced surface shadows, cyan glow, gradients, and heavy borders across shared controls.
+- Changed the primary action to a restrained `Compare predictions ->` action.
+- Reduced repeated page titling and replaced the duplicate hero title with `Compare workloads`.
+- Kept responsive What-If layouts at 768px, 1024px, and 1440px without horizontal overflow.
+- Added asset revision query strings so browsers do not retain stale pre-refinement CSS or JavaScript.
+
+The What-If request still uses the real `/api/what-if` endpoint. During this QA run the environment returned a truthful unavailable state because the ML dependency path returned HTTP 503; no mock result was introduced.
+
 ## Files involved
 
 - `frontend/index.html` — corrected asset references.
