@@ -58,3 +58,12 @@ Measured Phase 4 dataset and model results are recorded in [docs/PHASE4_RESULTS.
 
 Historical phase results: [Phase 1](docs/PHASE1_RESULTS.md), [Phase 2](docs/PHASE2_RESULTS.md), and [Phase 3](docs/PHASE3_RESULTS.md).
 
+## Phase 5 — What-If Analysis
+
+Phase 5 compares Phase 4 model predictions for baseline and hypothetical workloads without executing them. It supports parameter changes, concurrency/TPS sweeps, JSON/CSV output, and model-derived sensitivity. Sensitivity describes learned associations within the training distribution; it is not causal proof. Predictions are strongest inside the observed training range, and Phase 4 warnings are preserved.
+
+```powershell
+python scripts/what_if.py --scenario NORMAL_DAY --concurrency 50 --target-tps 100 --change-concurrency 100 --output-json artifacts/what-if.json
+python scripts/what_if.py --scenario NORMAL_DAY --concurrency 50 --target-tps 100 --sweep-concurrency 25 50 75 100 --output-csv artifacts/concurrency-sweep.csv
+```
+
