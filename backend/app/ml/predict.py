@@ -6,13 +6,14 @@ import joblib
 import pandas as pd
 
 from .dataset import RATIOS, TARGETS
+from ..workload.config import DEFAULT_MIXES, Scenario
 
 
 def predict_performance(workload: dict, model_dir: Path = Path("artifacts/models")) -> dict:
     if not model_dir.exists() or not any(model_dir.glob("*.joblib")):
         raise FileNotFoundError("No trained model artifacts exist. Run additional measured experiments before training.")
     row = {"scenario": workload["scenario"], "concurrency": workload["concurrency"], "target_tps": workload["target_tps"], "duration_seconds": workload.get("duration_seconds", 10.0), "burstiness": workload.get("burstiness", 0.0)}
-    mix = workload.get("operation_mix", {})
+    mix = workload.get("operation_mix") or DEFAULT_MIXES.get(Scenario(workload["scenario"]), {})
     for operation in RATIOS:
         row[f"{operation.lower()}_ratio"] = mix.get(operation, 0.0)
     frame = pd.DataFrame([row])

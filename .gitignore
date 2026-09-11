@@ -3,6 +3,7 @@
 !.env.example
 
 .venv/
+.venv-ml/
 venv/
 env/
 __pycache__/
@@ -28,6 +29,7 @@ data/
 datasets/
 outputs/
 experiments/
+artifacts/
 tmp/
 temp/
 
