@@ -54,3 +54,5 @@ Available scenarios include `NORMAL_DAY`, `SALARY_DAY`, `MONTH_END`, `FESTIVAL_S
 
 Phase 1 is complete. Phase 2 workload generation is complete. Phase 3 telemetry is complete. Phase 4 ML dataset diagnostics and leakage-safe training/prediction infrastructure are implemented, but model training is intentionally gated until more measured workload diversity exists. What-if prediction, optimization recommendations, validation dashboards, and cloud infrastructure remain future phases.
 
+Measured Phase 4 dataset and model results are recorded in [docs/PHASE4_RESULTS.md](docs/PHASE4_RESULTS.md). Results are preliminary because the current dataset contains seven usable experiment summaries.
+
