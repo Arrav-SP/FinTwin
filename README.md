@@ -52,5 +52,5 @@ Available scenarios include `NORMAL_DAY`, `SALARY_DAY`, `MONTH_END`, `FESTIVAL_S
 
 ## Project status and future phases
 
-Phase 1 is complete. Phase 2 workload generation is implemented. Telemetry, ML, what-if prediction, optimization recommendations, validation dashboards, and cloud infrastructure remain future phases.
+Phase 1 is complete. Phase 2 workload generation is complete. Phase 3 telemetry is complete. Phase 4 ML dataset diagnostics and leakage-safe training/prediction infrastructure are implemented, but model training is intentionally gated until more measured workload diversity exists. What-if prediction, optimization recommendations, validation dashboards, and cloud infrastructure remain future phases.
 
