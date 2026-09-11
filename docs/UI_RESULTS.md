@@ -92,6 +92,19 @@ The second visual pass reduced the generated-dashboard feel without changing app
 
 The What-If request still uses the real `/api/what-if` endpoint. During this QA run the environment returned a truthful unavailable state because the ML dependency path returned HTTP 503; no mock result was introduced.
 
+## API connection verification
+
+The frontend uses relative API paths such as `/api/predictions`, so it expects the FastAPI application to serve both the UI and API from the same origin. The browser error occurred because the page was opened on port `8011` after that FastAPI process had stopped; the only active server was on the documented port `8000`.
+
+The correct same-origin startup command for the browser QA port is:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+& 'C:\Users\arrav\AppData\Local\Programs\Python\Python311\python.exe' -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8011
+```
+
+Python 3.11 was used because the machine's Python 3.14 NumPy extension was blocked by Application Control. With the compatible runtime, `POST /api/predictions` and `POST /api/what-if` both returned HTTP 200 and real model-derived responses. The API adapter was also corrected to omit optional null workload fields so the existing What-If normalizer can apply its scenario defaults.
+
 ## Files involved
 
 - `frontend/index.html` — corrected asset references.

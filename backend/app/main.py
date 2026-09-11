@@ -39,7 +39,7 @@ class WorkloadRequest(BaseModel):
     burstiness: float = Field(default=0.0, ge=0, le=1)
 
     def workload(self) -> dict[str, Any]:
-        return self.model_dump(mode="json")
+        return self.model_dump(mode="json", exclude_none=True)
 
 
 class WhatIfRequest(BaseModel):
