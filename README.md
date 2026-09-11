@@ -73,3 +73,5 @@ The measured Phase 5 what-if outputs are recorded in [docs/PHASE5_RESULTS.md](do
 
 Phase 6 analyzes measured telemetry and generates explainable, advisory bottleneck recommendations. It reuses Phase 3 evidence and handles unavailable `pg_stat_statements` gracefully. It never changes the database automatically. See [docs/PHASE6_OPTIMIZATION.md](docs/PHASE6_OPTIMIZATION.md).
 
+The verified Phase 6 assessment is recorded in [docs/PHASE6_RESULTS.md](docs/PHASE6_RESULTS.md).
+
