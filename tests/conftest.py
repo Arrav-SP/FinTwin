@@ -3,7 +3,7 @@ import pytest
 from backend.app.database import check_connection
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def require_postgres():
     try:
         check_connection()

@@ -37,7 +37,20 @@ Endpoints: `GET /api/health` checks the live PostgreSQL connection; `GET /api/da
 
 `database/schema.sql` contains the repeatable schema and indexes. `backend/app` contains configuration, SQLAlchemy connectivity, the FastAPI app, and transfer service. `scripts` contains initialization and deterministic seeding. `tests` contains integration tests. `docs/database_design.md` records the normalization and transaction design.
 
+## Phase 2 workload generator
+
+Phase 2 adds reproducible banking workloads without changing the six Phase 1 banking entities. Each run creates a unique experiment ID, records its configuration in `experiment_runs`, and records per-operation latency, success/failure, and errors in `workload_events`.
+
+After applying the updated schema, run a workload from PowerShell:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+python scripts/run_workload.py --scenario NORMAL_DAY --concurrency 4 --target-tps 10 --duration 10 --seed 42
+```
+
+Available scenarios include `NORMAL_DAY`, `SALARY_DAY`, `MONTH_END`, `FESTIVAL_SPIKE`, `CARD_PAYMENT_SPIKE`, `LOAN_PROCESSING`, and `HIGH_CONCURRENCY_TRANSFER`. Target TPS is the requested pacing; `actual_tps` is measured from completed operations. Workload execution uses SQLAlchemy's pooled connections and bounded thread concurrency.
+
 ## Project status and future phases
 
-Phase 1 intentionally does not include React, ML, workload simulation, telemetry, optimization recommendations, or cloud infrastructure. Future phases may add workload generation and observability only after this database foundation is verified.
+Phase 1 is complete. Phase 2 workload generation is implemented. Telemetry, ML, what-if prediction, optimization recommendations, validation dashboards, and cloud infrastructure remain future phases.
 

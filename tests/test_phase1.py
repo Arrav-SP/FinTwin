@@ -1,11 +1,14 @@
 from decimal import Decimal
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
 from backend.app.database import engine
 from backend.app.main import app
 from backend.app.services.transfer_service import TransferError, transfer_funds
+
+pytestmark = pytest.mark.usefixtures("require_postgres")
 
 
 def test_required_tables_and_seed_counts():
