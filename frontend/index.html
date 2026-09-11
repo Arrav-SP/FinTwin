@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0d12" />
+    <title>FinTwin — Database Performance Intelligence</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <a class="brand" href="#dashboard" aria-label="FinTwin home">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span><strong>FinTwin</strong><small>Performance Intelligence</small></span>
+        </a>
+        <nav class="nav-list">
+          <button class="nav-item active" data-page="dashboard"><span>◫</span>Dashboard</button>
+          <button class="nav-item" data-page="experiments"><span>◌</span>Experiments</button>
+          <button class="nav-item" data-page="prediction"><span>✦</span>Prediction</button>
+          <button class="nav-item" data-page="whatif"><span>↗</span>What-If Analysis</button>
+          <button class="nav-item" data-page="optimization"><span>◇</span>Optimization</button>
+          <button class="nav-item" data-page="validation"><span>✓</span>Validation</button>
+        </nav>
+        <div class="sidebar-status" id="sidebar-status" aria-live="polite">
+          <p class="eyebrow">SYSTEM STATUS</p>
+          <div class="status-row"><span class="status-dot pending"></span><span>PostgreSQL</span><b>Checking</b></div>
+          <div class="status-row"><span class="status-dot pending"></span><span>Telemetry</span><b>Checking</b></div>
+          <div class="status-row"><span class="status-dot pending"></span><span>ML models</span><b>Checking</b></div>
+        </div>
+      </aside>
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="crumb"><span id="page-kicker">INTELLIGENCE CENTER</span><h1 id="page-title">Dashboard</h1></div>
+          <div class="topbar-actions">
+            <span class="live-status" id="top-status"><i class="status-dot pending"></i> Connecting</span>
+            <button class="icon-button" id="refresh-button" aria-label="Refresh live data" title="Refresh live data">↻</button>
+          </div>
+        </header>
+        <section id="app" class="content" aria-live="polite"></section>
+      </main>
+    </div>
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+    <aside class="drawer" id="drawer" aria-label="Experiment detail" aria-hidden="true" inert></aside>
+    <div class="toast-region" id="toast-region" aria-live="polite"></div>
+    <script src="app.js" defer></script>
+  </body>
+</html>

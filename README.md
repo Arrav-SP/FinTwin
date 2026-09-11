@@ -97,3 +97,14 @@ Validation metrics are reported only for completed runs with both predicted and 
 
 The first measured Phase 7 result is recorded in [docs/PHASE7_RESULTS.md](docs/PHASE7_RESULTS.md). It completed successfully, but showed material prediction error: 49.75% for average latency, 66.52% for P95 latency, 20.57% for throughput, and 50.54% for host CPU. These are preliminary results from one real validation configuration, not statistically meaningful overall accuracy claims.
 
+## Product UI
+
+FinTwin includes a dependency-free, FastAPI-served product interface at `http://127.0.0.1:8000/`. It consumes the live API instead of supplying static demo values. The dashboard, experiments, prediction, what-if, optimization, and validation views all handle unavailable, empty, loading, and error states honestly.
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+uvicorn backend.app.main:app --reload
+```
+
+Open `http://127.0.0.1:8000/` in a browser. See [docs/FRONTEND.md](docs/FRONTEND.md) for data flow and UI behavior.
+
