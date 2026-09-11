@@ -56,3 +56,5 @@ Phase 1 is complete. Phase 2 workload generation is complete. Phase 3 telemetry 
 
 Measured Phase 4 dataset and model results are recorded in [docs/PHASE4_RESULTS.md](docs/PHASE4_RESULTS.md). Results are preliminary because the current dataset contains seven usable experiment summaries.
 
+Historical phase results: [Phase 1](docs/PHASE1_RESULTS.md), [Phase 2](docs/PHASE2_RESULTS.md), and [Phase 3](docs/PHASE3_RESULTS.md).
+
