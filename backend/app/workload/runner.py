@@ -14,6 +14,7 @@ from sqlalchemy import text
 
 from ..database import engine
 from ..services.transfer_service import TransferError, transfer_funds
+from ..telemetry.metrics import summarize_latencies
 from .config import WorkloadConfig
 
 
@@ -35,6 +36,9 @@ class WorkloadResult:
     failed_operations: int
     actual_tps: float
     average_latency_ms: float
+    p50_latency_ms: float | None
+    p95_latency_ms: float | None
+    p99_latency_ms: float | None
     started_at: datetime
     completed_at: datetime
 
@@ -46,11 +50,13 @@ class WorkloadRunner:
         self.config = config
         self.random = random.Random(config.seed)
 
-    def run(self) -> WorkloadResult:
+    def run(self, telemetry_collector=None) -> WorkloadResult:
         experiment_id = uuid4()
         started_at = datetime.now(timezone.utc)
         started_clock = perf_counter()
         self._create_experiment(experiment_id, started_at)
+        if telemetry_collector is not None:
+            telemetry_collector.start(experiment_id)
         requested = max(1, round(self.config.target_tps * self.config.duration_seconds))
         futures: list[Future[OperationResult]] = []
         with ThreadPoolExecutor(max_workers=self.config.concurrency, thread_name_prefix="fintwin-worker") as executor:
@@ -65,9 +71,12 @@ class WorkloadRunner:
         completed_at = datetime.now(timezone.utc)
         elapsed = max(perf_counter() - started_clock, 1e-9)
         successful = sum(result.success for result in results)
-        average_latency = sum(result.latency_ms for result in results) / len(results) if results else 0.0
-        result = WorkloadResult(experiment_id, self.config.scenario.value, requested, len(results), successful, len(results) - successful, len(results) / elapsed, average_latency, started_at, completed_at)
+        latency = summarize_latencies(result.latency_ms for result in results)
+        result = WorkloadResult(experiment_id, self.config.scenario.value, requested, len(results), successful, len(results) - successful, len(results) / elapsed, latency["average_latency_ms"] or 0.0, latency["p50_latency_ms"], latency["p95_latency_ms"], latency["p99_latency_ms"], started_at, completed_at)
         self._complete_experiment(result)
+        if telemetry_collector is not None:
+            telemetry_collector.stop()
+            telemetry_collector.finalize(result)
         return result
 
     def _create_experiment(self, experiment_id: UUID, started_at: datetime) -> None:
@@ -84,9 +93,10 @@ class WorkloadRunner:
                 SET completed_at = :completed_at, status = 'COMPLETED', requested_operations = :requested,
                     completed_operations = :completed, successful_operations = :successful,
                     failed_operations = :failed, actual_tps = :actual_tps,
-                    average_latency_ms = :average_latency
+                    average_latency_ms = :average_latency, p50_latency_ms = :p50,
+                    p95_latency_ms = :p95, p99_latency_ms = :p99, error_rate = :error_rate
                 WHERE experiment_id = :experiment_id
-            """), {"completed_at": result.completed_at, "requested": result.requested_operations, "completed": result.completed_operations, "successful": result.successful_operations, "failed": result.failed_operations, "actual_tps": result.actual_tps, "average_latency": result.average_latency_ms, "experiment_id": result.experiment_id})
+            """), {"completed_at": result.completed_at, "requested": result.requested_operations, "completed": result.completed_operations, "successful": result.successful_operations, "failed": result.failed_operations, "actual_tps": result.actual_tps, "average_latency": result.average_latency_ms, "p50": result.p50_latency_ms, "p95": result.p95_latency_ms, "p99": result.p99_latency_ms, "error_rate": result.failed_operations / result.completed_operations if result.completed_operations else 0, "experiment_id": result.experiment_id})
 
     def _execute_operation(self, experiment_id: UUID, operation: str, seed: int) -> OperationResult:
         started = perf_counter()
@@ -163,4 +173,3 @@ class WorkloadRunner:
 
     def _configuration_json(self) -> str:
         return json.dumps({"concurrency": self.config.concurrency, "target_tps": self.config.target_tps, "duration_seconds": self.config.duration_seconds, "operation_mix": dict(self.config.operation_mix), "seed": self.config.seed, "burstiness": self.config.burstiness})
-

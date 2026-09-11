@@ -5,6 +5,7 @@ import json
 from dataclasses import asdict
 
 from backend.app.workload import Scenario, WorkloadConfig, WorkloadRunner
+from backend.app.telemetry import TelemetryCollector
 
 
 def main() -> None:
@@ -14,11 +15,13 @@ def main() -> None:
     parser.add_argument("--target-tps", type=float, default=10.0)
     parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--telemetry-interval", type=float, default=1.0)
+    parser.add_argument("--no-telemetry", action="store_true")
     args = parser.parse_args()
     config = WorkloadConfig(Scenario(args.scenario), args.concurrency, args.target_tps, args.duration, seed=args.seed)
-    print(json.dumps(asdict(WorkloadRunner(config).run()), default=str, indent=2))
+    collector = None if args.no_telemetry else TelemetryCollector(args.telemetry_interval)
+    print(json.dumps(asdict(WorkloadRunner(config).run(collector)), default=str, indent=2))
 
 
 if __name__ == "__main__":
     main()
-
