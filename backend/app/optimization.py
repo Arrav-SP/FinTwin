@@ -69,6 +69,5 @@ def analyze_experiment(experiment_id: str, thresholds: Thresholds = Thresholds()
 
 def save_csv(result: dict, path: Path) -> None:
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["recommendation_id", "category", "severity", "title", "evidence", "recommended_action", "expected_benefit", "coverage_status", "requires_validation"])
+        writer = csv.DictWriter(handle, fieldnames=["recommendation_id", "category", "severity", "title", "description", "evidence", "recommended_action", "expected_benefit", "coverage_status", "requires_validation"], extrasaction="ignore")
         writer.writeheader(); writer.writerows(result["recommendations"])
-
