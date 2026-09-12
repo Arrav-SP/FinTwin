@@ -144,6 +144,17 @@ The final frontend pass changes the information hierarchy without changing layou
 
 Browser QA verified Dashboard, Experiments, Prediction, What-If Analysis, Optimization, and Validation in Dark and Light modes at 1280px, with no page errors or horizontal overflow. Real Prediction and What-If submissions returned model-derived output, and the closed experiment drawer remained inert.
 
+## Reference-driven product pass
+
+The final pass used the local Dasha, Linear, Grafana, and Vercel references as directional input:
+
+- Database tooling references informed evidence-first labels, compact status, telemetry context, and table density.
+- Linear references informed quiet navigation, selected-state treatment, alignment, and list hierarchy.
+- Grafana references informed chart prominence, thin telemetry lines, grid discipline, and analytical spacing.
+- Vercel interaction guidance informed short result reveals and a reduced-motion fallback.
+
+The implementation remains dependency-free and same-origin. No backend, API, database, model, or data behavior was changed.
+
 ## Files involved
 
 - `frontend/index.html` — corrected asset references.

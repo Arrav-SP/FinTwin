@@ -26,6 +26,8 @@ A page title explains the task. Section headings group related work. Labels desc
 
 FinTwin is a work surface, not a dashboard template. Charts and tables carry more visual weight than decorative metric cards. Metrics are grouped by analytical relationship, not by card count. Containers exist to establish functional grouping, not visual decoration. FinTwin should look increasingly like database tooling as the user moves deeper into Experiments, Prediction, Optimization, and Validation.
 
+FinTwin is database performance engineering software, not an AI showcase. ML is an engine inside the product, not the visual identity of the product. Motion communicates state, continuity, hierarchy, or cause and effect; it never exists as decoration. Navigation should feel like a quiet engineering workstation, charts should carry telemetry meaning, and tables should carry investigation weight.
+
 ## Data integrity
 
 All displayed performance values, experiments, predictions, recommendations, and validation results come from the existing FastAPI APIs. Missing data remains visibly unavailable. The UI never invents measurements or confidence values.
