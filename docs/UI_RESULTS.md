@@ -105,6 +105,31 @@ $env:PYTHONPATH = (Get-Location).Path
 
 Python 3.11 was used because the machine's Python 3.14 NumPy extension was blocked by Application Control. With the compatible runtime, `POST /api/predictions` and `POST /api/what-if` both returned HTTP 200 and real model-derived responses. The API adapter was also corrected to omit optional null workload fields so the existing What-If normalizer can apply its scenario defaults.
 
+## V3 design overhaul
+
+The V3 redesign adds [frontend/DESIGN.md](../frontend/DESIGN.md) as the visual contract and applies it through shared semantic CSS tokens. Dark remains the default engineering-workstation theme, and Light is an intentionally designed technical analytics theme rather than an inverted palette.
+
+Verified behavior:
+
+- Theme toggle is keyboard-accessible and persists `dark` or `light` in `localStorage`.
+- Sidebar, header, forms, tables, charts, drawers, status indicators, warnings, loading states, empty states, and errors use the shared theme tokens.
+- Gradient buttons, decorative glow, excessive shadows, and nested What-If containers were removed from the active visual treatment.
+- Dashboard and Prediction copy now describe engineering tasks directly instead of marketing AI capabilities.
+- All six views render in both themes without changing the existing API flows.
+- Prediction and What-If return real model outputs in both themes at 1024px.
+- Browser checks at 768px, 1024px, and 1440px show no horizontal overflow.
+
+## Color system refinement
+
+The active frontend color language is now gradient-free. Legacy gradient CSS and the chart SVG fill were removed rather than overridden.
+
+- Dark mode uses neutral charcoal-black surfaces, gray borders, off-white text, and a restrained `#5FAFA7`-class teal accent.
+- Light mode uses neutral technical surfaces based on `#F5F5F3`, white panels, gray borders, and a darker teal accent.
+- Cards, buttons, status dots, charts, navigation, and forms use solid colors only.
+- Decorative glow, colored shadows, radial effects, gradient buttons, gradient backgrounds, and gradient chart fills were removed.
+- Remaining shadows are limited to neutral functional drawer/toast elevation.
+- Source audit found no `linear-gradient`, `radial-gradient`, `conic-gradient`, or `text-shadow` declarations under `frontend/`.
+
 ## Files involved
 
 - `frontend/index.html` — corrected asset references.

@@ -1,4 +1,4 @@
-const state = { page: "dashboard", experiments: [], validations: [], validationSummary: null, system: null, health: null, metric: "average_latency_ms", loading: true, error: null };
+const state = { page: "dashboard", experiments: [], validations: [], validationSummary: null, system: null, health: null, metric: "average_latency_ms", loading: true, error: null, theme: localStorage.getItem("fintwin-theme") || "dark" };
 
 const $ = (selector) => document.querySelector(selector);
 const app = $("#app");
@@ -31,10 +31,25 @@ function setSystemStatus() {
   $("#top-status").innerHTML = `<i class="status-dot ${statusDot(database)}"></i>${database === "connected" ? "PostgreSQL connected" : "Database unavailable"}`;
 }
 
+function applyTheme(theme) {
+  state.theme = theme === "light" ? "light" : "dark";
+  document.documentElement.dataset.theme = state.theme;
+  localStorage.setItem("fintwin-theme", state.theme);
+  const toggle = $("#theme-toggle");
+  if (toggle) {
+    const light = state.theme === "light";
+    toggle.setAttribute("aria-label", light ? "Switch to dark theme" : "Switch to light theme");
+    toggle.title = light ? "Switch to dark theme" : "Switch to light theme";
+    toggle.innerHTML = `<span class="theme-icon" aria-hidden="true">${light ? "☾" : "☼"}</span><span class="theme-label">${light ? "Dark" : "Light"}</span>`;
+  }
+}
+
+function toggleTheme() { applyTheme(state.theme === "dark" ? "light" : "dark"); }
+
 function setPage(page) {
   state.page = page;
   document.querySelectorAll(".nav-item").forEach((button) => button.classList.toggle("active", button.dataset.page === page));
-  const labels = { dashboard: ["INTELLIGENCE CENTER", "Dashboard"], experiments: ["OBSERVABILITY", "Experiments"], prediction: ["MACHINE LEARNING", "Prediction"], whatif: ["SIMULATION", "What-If Analysis"], optimization: ["ADVISORY ENGINE", "Optimization"], validation: ["RESEARCH VALIDATION", "Validation"] };
+  const labels = { dashboard: ["WORKSPACE", "Dashboard"], experiments: ["EXPERIMENTS", "Experiments"], prediction: ["PREDICTION", "Prediction"], whatif: ["COMPARISON", "What-If Analysis"], optimization: ["PERFORMANCE REVIEW", "Optimization"], validation: ["VALIDATION", "Validation"] };
   $("#page-kicker").textContent = labels[page][0]; $("#page-title").textContent = labels[page][1];
   render(); window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -61,7 +76,7 @@ function lineChart(records, key) {
   const points = plotRecords.map((record, index) => `${x(index)},${y(Number(record[key]))}`).join(" ");
   const area = `${pad.left},${height - pad.bottom} ${points} ${x(plotRecords.length - 1)},${height - pad.bottom}`;
   const labels = [max, min + (max - min) / 2, min];
-  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${metricName(key)} across recent measured experiments"><defs><linearGradient id="area-gradient" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#54d1bd" stop-opacity=".2"/><stop offset="1" stop-color="#54d1bd" stop-opacity="0"/></linearGradient></defs>${labels.map((value) => `<line class="chart-grid" x1="${pad.left}" x2="${width - pad.right}" y1="${y(value)}" y2="${y(value)}"/><text class="chart-label" x="0" y="${y(value) + 3}">${number(value, 1)}</text>`).join("")}<polygon class="chart-area" points="${area}"/><polyline class="chart-line" points="${points}"/>${plotRecords.map((record, index) => `<circle class="chart-dot" cx="${x(index)}" cy="${y(Number(record[key]))}" r="3"><title>${dateTime(record.started_at)}: ${number(record[key])} ${metricUnit(key)}</title></circle>`).join("")}<text class="chart-label" x="${pad.left}" y="${height - 7}">Older</text><text class="chart-label" x="${width - 36}" y="${height - 7}">Latest</text></svg></div>`;
+  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${metricName(key)} across recent measured experiments">${labels.map((value) => `<line class="chart-grid" x1="${pad.left}" x2="${width - pad.right}" y1="${y(value)}" y2="${y(value)}"/><text class="chart-label" x="0" y="${y(value) + 3}">${number(value, 1)}</text>`).join("")}<polyline class="chart-line" points="${points}"/>${plotRecords.map((record, index) => `<circle class="chart-dot" cx="${x(index)}" cy="${y(Number(record[key]))}" r="3"><title>${dateTime(record.started_at)}: ${number(record[key])} ${metricUnit(key)}</title></circle>`).join("")}<text class="chart-label" x="${pad.left}" y="${height - 7}">Older</text><text class="chart-label" x="${width - 36}" y="${height - 7}">Latest</text></svg></div>`;
 }
 
 function metricComparison(validation) {
@@ -75,7 +90,7 @@ function dashboard() {
   const latest = latestExperiment(); const validation = latestValidation(); const system = state.system || {};
   const metric = state.metric;
   const switches = [["average_latency_ms", "Avg latency"], ["p95_latency_ms", "P95"], ["actual_tps", "Throughput"], ["host_cpu_avg_percent", "CPU"]];
-  return `${pageHero(`Predict. <span class="accent">Simulate.</span> Optimize.`, "AI-powered performance intelligence for PostgreSQL banking workloads.", `<button class="action-button" onclick="setPage('prediction')">Create prediction</button>`)}
+  return `${pageHero("Database performance workspace", "Measure workloads, estimate performance, and review the evidence before changing PostgreSQL.", `<button class="action-button" onclick="setPage('prediction')">Predict performance →</button>`)}
     <section class="status-grid"><article class="status-card"><div><span>DATABASE</span><strong>${escapeHtml(statusText(system.database))}</strong></div><i class="status-dot ${statusDot(system.database)}"></i></article><article class="status-card"><div><span>TELEMETRY</span><strong>${escapeHtml(statusText(system.telemetry))}</strong></div><i class="status-dot ${statusDot(system.telemetry)}"></i></article><article class="status-card"><div><span>ML MODELS</span><strong>${escapeHtml(statusText(system.ml_models))}</strong></div><i class="status-dot ${statusDot(system.ml_models)}"></i></article></section>
     <section class="kpi-grid">${kpi("Average latency", number(latest?.average_latency_ms), "ms")}${kpi("P95 latency", number(latest?.p95_latency_ms), "ms")}${kpi("Actual throughput", number(latest?.actual_tps), "TPS")}${kpi("Host CPU", number(latest?.host_cpu_avg_percent), "%")}${kpi("Lock waits", integer(latest?.lock_wait_count_max), "")}</section>
     <section class="two-col"><article class="card">${cardHead("Database performance", "Measurements from recent PostgreSQL workload experiments.", `<div class="metric-switch" role="group" aria-label="Select chart metric">${switches.map(([key, label]) => `<button class="${metric === key ? "active" : ""}" onclick="switchMetric('${key}')">${label}</button>`).join("")}</div>`)}${lineChart(state.experiments, metric)}</article><article class="card">${cardHead("Prediction accuracy", validation ? `Validation ${compact(validation.validation_id)} · ${validation.scenario}` : "A real validation compares predicted and measured performance.", `<button class="secondary-button" onclick="setPage('validation')">Open validation</button>`)}${metricComparison(validation)}</article></section>`;
@@ -95,7 +110,7 @@ function filterExperiments() { const query = $("#experiment-search").value.toLow
 function workloadFields(prefix, defaults = {}) { const scenarios = ["NORMAL_DAY", "SALARY_DAY", "MONTH_END", "FESTIVAL_SPIKE", "CARD_PAYMENT_SPIKE", "LOAN_PROCESSING", "HIGH_CONCURRENCY_TRANSFER"]; return `<div class="form-grid"><div class="form-field"><label for="${prefix}-scenario">Scenario</label><select class="field" id="${prefix}-scenario">${scenarios.map((item) => `<option value="${item}" ${item === (defaults.scenario || "NORMAL_DAY") ? "selected" : ""}>${item.replaceAll("_", " ")}</option>`).join("")}</select></div><div class="form-field"><label for="${prefix}-concurrency">Concurrency</label><input class="field" id="${prefix}-concurrency" type="number" min="1" value="${defaults.concurrency || 10}"></div><div class="form-field"><label for="${prefix}-tps">Target TPS</label><input class="field" id="${prefix}-tps" type="number" min="0.1" step="0.1" value="${defaults.target_tps || 10}"></div><div class="form-field"><label for="${prefix}-duration">Duration (seconds)</label><input class="field" id="${prefix}-duration" type="number" min="1" step="1" value="${defaults.duration_seconds || 10}"></div></div>`; }
 function workloadFrom(prefix) { return { scenario: $(`#${prefix}-scenario`).value, concurrency: Number($(`#${prefix}-concurrency`).value), target_tps: Number($(`#${prefix}-tps`).value), duration_seconds: Number($(`#${prefix}-duration`).value) }; }
 function predictionResults(result) { const metrics = Object.entries(result.predictions || {}); return `<div class="result-panel">${cardHead("Predicted performance", "Model-derived outputs. These values are not real measurements.")}<div class="result-grid">${metrics.map(([key, value]) => `<div class="metric-result"><span>PREDICTED ${metricName(key.replace("predicted_", ""))}</span><strong>${number(value)} <small>${metricUnit(key)}</small></strong></div>`).join("")}</div>${(result.warnings || []).map((warning) => `<div class="warning"><b>Coverage warning</b><span>${escapeHtml(warning)}</span></div>`).join("")}</div>`; }
-function predictionPage() { return `${pageHero("Predict performance", "Configure a banking workload and evaluate the measured Phase 4 model before running PostgreSQL.")}<article class="card">${cardHead("Workload configuration", "Inputs are pre-execution workload parameters only.")}<form id="prediction-form">${workloadFields("prediction")}<div class="form-actions"><button class="action-button" type="submit">Predict performance</button><span class="form-note">Predictions remain distinct from actual observations.</span></div></form><div id="prediction-result"></div></article>`; }
+function predictionPage() { return `${pageHero("Predict performance", "Configure a workload and estimate how PostgreSQL is expected to perform before running it.")}<section class="workbench"><div class="section-intro">${cardHead("Workload", "Inputs describe the workload sent to the trained performance model.")}</div><form id="prediction-form">${workloadFields("prediction")}<div class="form-actions"><button class="action-button" type="submit">Predict performance →</button><span class="form-note">Predictions are distinct from actual observations.</span></div></form><div id="prediction-result"></div></section>`; }
 async function submitPrediction(event) { event.preventDefault(); const target = $("#prediction-result"); target.innerHTML = '<div class="skeleton" style="min-height:180px;margin-top:18px"></div>'; try { const result = await api("/api/predictions", { method: "POST", body: JSON.stringify(workloadFrom("prediction")) }); target.innerHTML = predictionResults(result); } catch (error) { target.innerHTML = `<div class="error-state" style="margin-top:18px"><div><b>Prediction unavailable</b><span>${escapeHtml(error.message)}</span></div></div>`; } }
 
 function whatIfPage() { return `${pageHero("Compare workloads", "Compare how two workload configurations are predicted to perform without executing either against PostgreSQL.")}<section class="whatif-workspace"><div class="whatif-intro">${cardHead("Simulation", "Configure a baseline, then see what changes when workload intensity shifts.")}</div><form id="whatif-form"><div class="whatif-grid"><section class="whatif-config"><h3>Baseline</h3><p>Current workload configuration</p>${workloadFields("base", { concurrency: 10, target_tps: 10 })}</section><section class="whatif-config"><h3>What-if</h3><p>Alternative workload configuration</p>${workloadFields("changed", { concurrency: 20, target_tps: 10 })}</section></div><div class="whatif-action"><span class="form-note">Predictions only. No database workload is executed.</span><button class="action-button" type="submit">Compare predictions <span aria-hidden="true">→</span></button></div></form><div id="whatif-result"></div></section>`; }
@@ -126,7 +141,9 @@ async function openExperiment(id) { const drawer = $("#drawer"), backdrop = $("#
 function closeDrawer() { $("#drawer").classList.remove("open"); $("#drawer-backdrop").classList.remove("open"); $("#drawer").setAttribute("aria-hidden", "true"); $("#drawer").inert = true; }
 function switchMetric(metric) { state.metric = metric; render(); }
 
-window.setPage = setPage; window.switchMetric = switchMetric; window.filterExperiments = filterExperiments; window.openExperiment = openExperiment; window.closeDrawer = closeDrawer; window.loadOptimization = loadOptimization; window.showValidationRun = showValidationRun;
+window.setPage = setPage; window.switchMetric = switchMetric; window.filterExperiments = filterExperiments; window.openExperiment = openExperiment; window.closeDrawer = closeDrawer; window.loadOptimization = loadOptimization; window.showValidationRun = showValidationRun; window.toggleTheme = toggleTheme;
+applyTheme(state.theme);
 document.querySelectorAll(".nav-item").forEach((button) => button.addEventListener("click", () => setPage(button.dataset.page)));
+$("#theme-toggle").addEventListener("click", toggleTheme);
 $("#refresh-button").addEventListener("click", () => refreshData(true)); $("#drawer-backdrop").addEventListener("click", closeDrawer);
 refreshData();
