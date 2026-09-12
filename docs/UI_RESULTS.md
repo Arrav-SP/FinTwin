@@ -130,6 +130,20 @@ The active frontend color language is now gradient-free. Legacy gradient CSS and
 - Remaining shadows are limited to neutral functional drawer/toast elevation.
 - Source audit found no `linear-gradient`, `radial-gradient`, `conic-gradient`, or `text-shadow` declarations under `frontend/`.
 
+## Product-specific composition pass
+
+The final frontend pass changes the information hierarchy without changing layout architecture or functionality:
+
+- Dashboard status is now one compact system row instead of three status cards.
+- Latest measured performance is one divider-led metric strip instead of five KPI cards.
+- Performance history and predicted-vs-actual analysis form the main workspace.
+- Recent experiments are presented as a compact engineering table with real measured values.
+- Experiment scenarios are plain technical text; status remains the only badge-like state.
+- Navigation metadata is title case and quieter, reducing dashboard-template labeling.
+- `frontend/DESIGN.md` now explicitly defines FinTwin as a work surface rather than a dashboard template.
+
+Browser QA verified Dashboard, Experiments, Prediction, What-If Analysis, Optimization, and Validation in Dark and Light modes at 1280px, with no page errors or horizontal overflow. Real Prediction and What-If submissions returned model-derived output, and the closed experiment drawer remained inert.
+
 ## Files involved
 
 - `frontend/index.html` — corrected asset references.
