@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { useExperimentDetail, useLatencyBreakdown } from "../api/queries";
 import type { ExperimentDetail, ExperimentDetailResponse } from "../api/types";
+import { AdvisorFindings } from "../components/AdvisorFindings";
 import { EvidenceGap, EvidenceKey } from "../components/EvidenceGap";
 import { pairValidationMetrics } from "../components/evidence";
 import { LatencyBreakdown } from "../components/LatencyBreakdown";
@@ -125,6 +126,7 @@ export function RunDetail() {
       <div className="grid gap-14">
         <Telemetry detail={detail.data} />
         <Latency id={id} />
+        {run.status === "COMPLETED" && <AdvisorFindings id={id} />}
         <CheckedPrediction detail={detail.data} />
         <Record run={run} />
       </div>

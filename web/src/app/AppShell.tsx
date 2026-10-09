@@ -5,8 +5,11 @@ import type { ComponentState } from "../api/types";
 const NAVIGATION = [
   { to: "/", label: "Overview", end: true },
   { to: "/experiments", label: "Experiments", end: false },
+  { to: "/run", label: "Run", end: false },
   { to: "/predict", label: "Predict", end: false },
   { to: "/what-if", label: "What if", end: false },
+  { to: "/validation", label: "Validation", end: false },
+  { to: "/models", label: "Models", end: false },
 ];
 
 const HEALTHY: ComponentState[] = ["connected", "active", "ready"];
@@ -65,7 +68,7 @@ export function AppShell() {
       <header className="sticky top-0 z-10 border-b border-rule bg-ink/95 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-x-5 px-5 sm:gap-x-8 sm:px-8">
           <Wordmark />
-          <nav aria-label="Sections" className="flex h-full items-stretch gap-4 overflow-x-auto whitespace-nowrap sm:gap-6">
+          <nav aria-label="Sections" className="flex h-full min-w-0 items-stretch gap-4 overflow-x-auto whitespace-nowrap [scrollbar-width:none] sm:gap-6">
             {NAVIGATION.map(({ to, label, end }) => (
               <NavLink
                 key={to}
@@ -79,7 +82,7 @@ export function AppShell() {
               </NavLink>
             ))}
           </nav>
-          <div className="ml-auto">
+          <div className="ml-auto shrink-0">
             <SystemStatus />
           </div>
         </div>

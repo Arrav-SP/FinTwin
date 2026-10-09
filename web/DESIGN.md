@@ -81,6 +81,9 @@ The serif is the editorial voice and appears only where the interface is saying 
 | `SweepChart` | Predictions across one setting: dashed paper line, hollow points, a slate band for the trained range |
 | `TelemetryChart` | One sampled measurement across a run: solid signal line, time in seconds on x |
 | `LatencyBreakdown` | Filled horizontal bars for the latency histogram beside a per-operation table |
+| `JobRunner` | The workload form plus a background job followed to its outcome: a status line, a paper-coloured progress bar that is an estimate from elapsed time, then a link to the run. Used by Run and Validation |
+| `AccuracyChart` | Checked predictions for one metric: measured across, predicted up, hollow points, and a solid signal diagonal where an exact prediction would sit |
+| `AdvisorFindings` | Inside run detail: severity in words, the evidence as named values, then what to look at. Amber, never red |
 | `Placeholder`, `EmptyState`, `ErrorState` | Shaped like the content; a left rule, a serif line, a plain explanation |
 
 ## Charts

@@ -169,3 +169,45 @@ export interface Sweep {
   results: { configuration: WorkloadInput; predictions: Record<string, number>; warnings: string[] }[];
   warnings: string[];
 }
+
+export type JobKind = "workload" | "validation";
+export type JobStatus = "queued" | "running" | "completed" | "failed";
+
+export interface JobRequest {
+  kind: JobKind;
+  workload: WorkloadInput;
+  seed?: number;
+  telemetry_interval?: number;
+}
+
+export interface Job {
+  job_id: string;
+  kind: JobKind;
+  status: JobStatus;
+  request: JobRequest;
+  submitted_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  result: { experiment_id: string | null; validation_id?: string } | null;
+  error: string | null;
+}
+
+export interface Recommendation {
+  recommendation_id: string;
+  category: string;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO";
+  title: string;
+  description: string;
+  evidence: Record<string, Numeric>;
+  recommended_action: string;
+  expected_benefit: string;
+  requires_validation: boolean;
+}
+
+export interface Assessment {
+  overall_status: "NORMAL" | "ELEVATED";
+  summary: string;
+  recommendations: Recommendation[];
+  query_statistics_available: boolean;
+  warnings?: string[];
+}
