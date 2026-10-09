@@ -44,8 +44,16 @@ def calculate_errors(predicted: dict[str, Any], actual: dict[str, Any]) -> dict[
     }
 
 
+def _configuration_identity(record: dict[str, Any]) -> tuple:
+    config = record.get("workload_configuration") or {}
+    return (record.get("scenario"), config.get("concurrency"), config.get("target_tps"), config.get("duration_seconds"))
+
+
 def _aggregate(records: list[dict[str, Any]]) -> dict[str, Any]:
     result: dict[str, Any] = {}
+    # R² compares the model with the mean of the actual values, so it only says something
+    # when the validated workloads differ; repeats of one configuration leave only noise.
+    varied = len({_configuration_identity(record) for record in records}) > 1
     for target in VALIDATION_TARGETS:
         pairs = [(r.get("predicted_metrics", {}).get(prediction_key(target)), r.get("actual_metrics", {}).get(target)) for r in records]
         pairs = [(float(p), float(a)) for p, a in pairs if p is not None and a is not None]
@@ -61,7 +69,7 @@ def _aggregate(records: list[dict[str, Any]]) -> dict[str, Any]:
             "count": len(pairs),
             "mae": sum(absolute) / len(absolute),
             "rmse": math.sqrt(sum(error ** 2 for error in errors) / len(errors)),
-            "r2": 1 - ss_residual / ss_total if ss_total else None,
+            "r2": 1 - ss_residual / ss_total if varied and ss_total else None,
             "mape": sum(percentage) / len(percentage) if percentage else None,
         }
     return result
@@ -93,7 +101,7 @@ def summarize_validations(records: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _configuration(config: WorkloadConfig) -> dict[str, Any]:
-    return {"scenario": config.scenario.value, "concurrency": config.concurrency, "target_tps": config.target_tps, "duration_seconds": config.duration_seconds, "operation_mix": dict(config.operation_mix), "seed": config.seed, "burstiness": config.burstiness}
+    return {"scenario": config.scenario.value, "concurrency": config.concurrency, "target_tps": config.target_tps, "duration_seconds": config.duration_seconds, "operation_mix": dict(config.operation_mix), "seed": config.seed, "burstiness": config.burstiness, "account_skew": config.account_skew}
 
 
 def _json(value: Any) -> str:
@@ -135,7 +143,7 @@ def run_validation(config: WorkloadConfig, model_dir: Path = Path("artifacts/mod
         # Keep the base API importable when the optional native ML stack is not installed.
         from .ml.predict import predict_performance
 
-        prediction = predict_performance({"scenario": config.scenario.value, "concurrency": config.concurrency, "target_tps": config.target_tps, "duration_seconds": config.duration_seconds, "operation_mix": dict(config.operation_mix), "burstiness": config.burstiness}, model_dir)
+        prediction = predict_performance({"scenario": config.scenario.value, "concurrency": config.concurrency, "target_tps": config.target_tps, "duration_seconds": config.duration_seconds, "operation_mix": dict(config.operation_mix), "burstiness": config.burstiness, "account_skew": config.account_skew}, model_dir)
         _update(validation_id, predicted_metrics=_json(prediction["predictions"]), model_version=_json({"model_dir": str(model_dir), "warnings": prediction.get("warnings", [])}))
         result = WorkloadRunner(config).run(TelemetryCollector(telemetry_interval))
         actual = _actual_metrics(result.experiment_id)

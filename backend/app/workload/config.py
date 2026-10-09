@@ -15,6 +15,8 @@ class Scenario(StrEnum):
     HIGH_CONCURRENCY_TRANSFER = "HIGH_CONCURRENCY_TRANSFER"
 
 
+from ..limits import MAX_CONCURRENCY
+
 OperationMix = Mapping[str, float]
 
 DEFAULT_MIXES: dict[Scenario, dict[str, float]] = {
@@ -37,16 +39,21 @@ class WorkloadConfig:
     operation_mix: OperationMix | None = None
     seed: int = 42
     burstiness: float = 0.0
+    account_skew: float = 0.0
 
     def __post_init__(self) -> None:
         if self.concurrency < 1:
             raise ValueError("concurrency must be at least 1")
+        if self.concurrency > MAX_CONCURRENCY:
+            raise ValueError(f"concurrency must not exceed {MAX_CONCURRENCY}")
         if self.target_tps <= 0:
             raise ValueError("target_tps must be greater than 0")
         if self.duration_seconds <= 0:
             raise ValueError("duration_seconds must be greater than 0")
         if not 0 <= self.burstiness <= 1:
             raise ValueError("burstiness must be between 0 and 1")
+        if self.account_skew < 0:
+            raise ValueError("account_skew must not be negative")
         mix = dict(self.operation_mix or DEFAULT_MIXES[self.scenario])
         if not mix or any(weight <= 0 for weight in mix.values()):
             raise ValueError("operation_mix must contain positive weights")

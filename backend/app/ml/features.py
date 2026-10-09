@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from .dataset import RATIOS
 
-NUMERIC_FEATURES = ("concurrency", "target_tps", "duration_seconds", "burstiness", *[f"{operation.lower()}_ratio" for operation in RATIOS])
+NUMERIC_FEATURES = ("concurrency", "target_tps", "duration_seconds", "burstiness", "account_skew", *[f"{operation.lower()}_ratio" for operation in RATIOS])
 
 
 @dataclass(frozen=True)

@@ -7,6 +7,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from sqlalchemy import text
 from .database import engine
+from .telemetry.metrics import summary_select
 
 
 @dataclass(frozen=True)
@@ -53,7 +54,7 @@ def analyze_metrics(metrics: dict, thresholds: Thresholds = Thresholds()) -> dic
 
 def analyze_experiment(experiment_id: str, thresholds: Thresholds = Thresholds()) -> dict:
     with engine.connect() as connection:
-        row = connection.execute(text("SELECT e.experiment_id, e.scenario, e.configuration, e.actual_tps, e.average_latency_ms, e.p95_latency_ms, s.* FROM experiment_runs e LEFT JOIN experiment_summaries s USING (experiment_id) WHERE e.experiment_id = :id"), {"id": experiment_id}).mappings().first()
+        row = connection.execute(text(f"SELECT e.experiment_id, e.scenario, e.configuration, e.actual_tps, e.average_latency_ms, e.p95_latency_ms, {summary_select('s')} FROM experiment_runs e LEFT JOIN experiment_summaries s USING (experiment_id) WHERE e.experiment_id = :id"), {"id": experiment_id}).mappings().first()
         if row is None: raise ValueError(f"Experiment not found: {experiment_id}")
         query_stats = []
         try:

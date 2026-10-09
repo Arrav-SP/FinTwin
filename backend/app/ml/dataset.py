@@ -47,10 +47,11 @@ def load_experiments() -> pd.DataFrame:
         row["target_tps"] = configuration.get("target_tps")
         row["duration_seconds"] = configuration.get("duration_seconds")
         row["burstiness"] = configuration.get("burstiness", 0.0)
+        row["account_skew"] = configuration.get("account_skew", 0.0)
         mix = configuration.get("operation_mix", {})
         for operation in RATIOS:
             row[f"{operation.lower()}_ratio"] = mix.get(operation, 0.0)
-        row["configuration_key"] = json.dumps({key: row[key] for key in ("scenario", "concurrency", "target_tps", "duration_seconds", "burstiness", *[f"{op.lower()}_ratio" for op in RATIOS])}, sort_keys=True)
+        row["configuration_key"] = json.dumps({key: row[key] for key in ("scenario", "concurrency", "target_tps", "duration_seconds", "burstiness", "account_skew", *[f"{op.lower()}_ratio" for op in RATIOS])}, sort_keys=True)
         records.append(row)
     return pd.DataFrame(records), telemetry_count
 

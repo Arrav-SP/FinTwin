@@ -4,8 +4,10 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 
 from .config import get_settings
+from .limits import MAX_CONCURRENCY
 
-engine = create_engine(get_settings().database_url, pool_pre_ping=True)
+# One connection per worker thread at the maximum concurrency, plus headroom for telemetry and the API.
+engine = create_engine(get_settings().database_url, pool_pre_ping=True, pool_size=10, max_overflow=MAX_CONCURRENCY)
 
 
 def check_connection() -> None:

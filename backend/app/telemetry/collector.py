@@ -5,7 +5,7 @@ import threading
 from datetime import datetime, timezone
 from sqlalchemy import text
 from ..database import engine
-from .metrics import counter_delta
+from .metrics import average_excluding_initial, counter_delta
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +37,13 @@ class TelemetryCollector:
     def finalize(self, result):
         with engine.connect() as connection:
             rows = connection.execute(text("SELECT * FROM telemetry_samples WHERE experiment_id = :id ORDER BY captured_at"), {"id": self.experiment_id}).mappings().all()
-        host_cpu = [float(row["host_cpu_percent"]) for row in rows if row["host_cpu_percent"] is not None]
         host_memory = [float(row["host_memory_percent"]) for row in rows if row["host_memory_percent"] is not None]
         with engine.begin() as connection:
             connection.execute(text("""
-                INSERT INTO experiment_summaries (experiment_id, error_rate, p50_latency_ms, p95_latency_ms, p99_latency_ms, active_connections_max, blocked_sessions_max, lock_wait_count_max, db_xact_commit_delta, db_xact_rollback_delta, db_deadlocks_delta, db_cache_hit_ratio, host_cpu_avg_percent, host_memory_avg_percent, db_size_before_bytes, db_size_after_bytes, telemetry_sample_count, telemetry_error_count, generated_at)
-                VALUES (:id, :error_rate, :p50, :p95, :p99, :active, :blocked, :locks, :commits, :rollbacks, :deadlocks, :cache, :cpu, :memory, :before_size, :after_size, :samples, :errors, :generated)
+                INSERT INTO experiment_summaries (experiment_id, error_rate, p50_latency_ms, p95_latency_ms, p99_latency_ms, active_connections_max, max_connections, blocked_sessions_max, lock_wait_count_max, db_xact_commit_delta, db_xact_rollback_delta, db_deadlocks_delta, db_cache_hit_ratio, host_cpu_avg_percent, host_memory_avg_percent, db_size_before_bytes, db_size_after_bytes, telemetry_sample_count, telemetry_error_count, generated_at)
+                VALUES (:id, :error_rate, :p50, :p95, :p99, :active, :maximum, :blocked, :locks, :commits, :rollbacks, :deadlocks, :cache, :cpu, :memory, :before_size, :after_size, :samples, :errors, :generated)
                 ON CONFLICT (experiment_id) DO UPDATE SET generated_at = EXCLUDED.generated_at
-            """), {"id": self.experiment_id, "error_rate": result.failed_operations / result.completed_operations if result.completed_operations else 0, "p50": result.p50_latency_ms, "p95": result.p95_latency_ms, "p99": result.p99_latency_ms, "active": max((r["active_connections"] for r in rows if r["active_connections"] is not None), default=None), "blocked": max((r["blocked_sessions"] for r in rows if r["blocked_sessions"] is not None), default=None), "locks": max((r["lock_wait_count"] for r in rows if r["lock_wait_count"] is not None), default=None), "commits": counter_delta(self.initial.get("xact_commit"), self.final.get("xact_commit")), "rollbacks": counter_delta(self.initial.get("xact_rollback"), self.final.get("xact_rollback")), "deadlocks": counter_delta(self.initial.get("deadlocks"), self.final.get("deadlocks")), "cache": self.final.get("cache_hit_ratio"), "cpu": sum(host_cpu) / len(host_cpu) if host_cpu else None, "memory": sum(host_memory) / len(host_memory) if host_memory else None, "before_size": self.initial.get("database_size_bytes"), "after_size": self.final.get("database_size_bytes"), "samples": len(rows), "errors": self.errors, "generated": datetime.now(timezone.utc)})
+            """), {"id": self.experiment_id, "error_rate": result.failed_operations / result.completed_operations if result.completed_operations else 0, "p50": result.p50_latency_ms, "p95": result.p95_latency_ms, "p99": result.p99_latency_ms, "active": max((r["active_connections"] for r in rows if r["active_connections"] is not None), default=None), "maximum": max((r["max_connections"] for r in rows if r["max_connections"] is not None), default=None), "blocked": max((r["blocked_sessions"] for r in rows if r["blocked_sessions"] is not None), default=None), "locks": max((r["lock_wait_count"] for r in rows if r["lock_wait_count"] is not None), default=None), "commits": counter_delta(self.initial.get("xact_commit"), self.final.get("xact_commit")), "rollbacks": counter_delta(self.initial.get("xact_rollback"), self.final.get("xact_rollback")), "deadlocks": counter_delta(self.initial.get("deadlocks"), self.final.get("deadlocks")), "cache": self.final.get("cache_hit_ratio"), "cpu": average_excluding_initial(rows, "host_cpu_percent"), "memory": sum(host_memory) / len(host_memory) if host_memory else None, "before_size": self.initial.get("database_size_bytes"), "after_size": self.final.get("database_size_bytes"), "samples": len(rows), "errors": self.errors, "generated": datetime.now(timezone.utc)})
 
     def _loop(self):
         while not self.stop_event.wait(self.interval_seconds):

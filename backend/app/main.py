@@ -11,8 +11,13 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from .database import check_connection, engine
+from .telemetry.metrics import summary_select
 from .validation import get_validation, list_validations, run_validation, validation_summary
 from .workload import Scenario, WorkloadConfig
+from .workload.config import MAX_CONCURRENCY
+
+MAX_TARGET_TPS = 1000.0
+MAX_DURATION_SECONDS = 600.0
 
 APP_ROOT = Path(__file__).resolve().parents[2]
 FRONTEND_ROOT = APP_ROOT / "frontend"
@@ -23,9 +28,9 @@ app.mount("/assets", StaticFiles(directory=FRONTEND_ROOT), name="assets")
 
 class ValidationRequest(BaseModel):
     scenario: Scenario = Scenario.NORMAL_DAY
-    concurrency: int = Field(default=10, ge=1)
-    target_tps: float = Field(default=10.0, gt=0)
-    duration_seconds: float = Field(default=10.0, gt=0)
+    concurrency: int = Field(default=10, ge=1, le=MAX_CONCURRENCY)
+    target_tps: float = Field(default=10.0, gt=0, le=MAX_TARGET_TPS)
+    duration_seconds: float = Field(default=10.0, gt=0, le=MAX_DURATION_SECONDS)
     seed: int = 42
     telemetry_interval: float = Field(default=1.0, gt=0)
 
@@ -124,8 +129,9 @@ def experiments(limit: int = 100) -> list[dict[str, Any]]:
 def experiment_detail(experiment_id: str) -> dict[str, Any]:
     try:
         with engine.connect() as connection:
-            experiment = connection.execute(text("""
-                SELECT e.*, s.* FROM experiment_runs e LEFT JOIN experiment_summaries s USING (experiment_id)
+            experiment = connection.execute(text(f"""
+                SELECT e.*, {summary_select("s")}
+                FROM experiment_runs e LEFT JOIN experiment_summaries s USING (experiment_id)
                 WHERE e.experiment_id = :id
             """), {"id": experiment_id}).mappings().first()
             if experiment is None:

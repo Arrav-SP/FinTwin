@@ -15,10 +15,12 @@ def main() -> None:
     parser.add_argument("--target-tps", type=float, default=10.0)
     parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--burstiness", type=float, default=0.0, help="0 = evenly spaced arrivals, 1 = exponential gaps")
+    parser.add_argument("--account-skew", type=float, default=0.0, help="0 = uniform account choice; higher values concentrate load on fewer accounts")
     parser.add_argument("--telemetry-interval", type=float, default=1.0)
     parser.add_argument("--no-telemetry", action="store_true")
     args = parser.parse_args()
-    config = WorkloadConfig(Scenario(args.scenario), args.concurrency, args.target_tps, args.duration, seed=args.seed)
+    config = WorkloadConfig(Scenario(args.scenario), args.concurrency, args.target_tps, args.duration, seed=args.seed, burstiness=args.burstiness, account_skew=args.account_skew)
     collector = None if args.no_telemetry else TelemetryCollector(args.telemetry_interval)
     print(json.dumps(asdict(WorkloadRunner(config).run(collector)), default=str, indent=2))
 

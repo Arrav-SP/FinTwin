@@ -8,9 +8,9 @@ from .workload.config import DEFAULT_MIXES, Scenario
 def normalize_workload(config: dict) -> dict:
     result = deepcopy(config)
     result["scenario"] = Scenario(result["scenario"]).value
+    result.setdefault("duration_seconds", 10.0); result.setdefault("burstiness", 0.0)
     for field in ("concurrency", "target_tps", "duration_seconds"):
         if float(result.get(field, 0)) <= 0: raise ValueError(f"{field} must be greater than zero")
-    result.setdefault("duration_seconds", 10.0); result.setdefault("burstiness", 0.0)
     result.setdefault("operation_mix", dict(DEFAULT_MIXES[Scenario(result["scenario"])]))
     if abs(sum(result["operation_mix"].values()) - 1.0) > 1e-6 or any(value < 0 for value in result["operation_mix"].values()): raise ValueError("operation_mix values must be non-negative and sum to 1")
     return result

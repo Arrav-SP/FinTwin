@@ -20,6 +20,25 @@ def summarize_latencies(values):
     return {"average_latency_ms": sum(values) / len(values), "min_latency_ms": min(values), "max_latency_ms": max(values), "p50_latency_ms": percentile(values, 50), "p95_latency_ms": percentile(values, 95), "p99_latency_ms": percentile(values, 99)}
 
 
+def average_excluding_initial(rows, key):
+    """Average a sampled column, skipping the INITIAL snapshot taken before the workload starts."""
+    values = [float(row[key]) for row in rows if row.get("sample_kind") != "INITIAL" and row.get(key) is not None]
+    return sum(values) / len(values) if values else None
+
+
+# experiment_summaries columns that experiment_runs does not also define.
+SUMMARY_COLUMNS = (
+    "active_connections_max", "max_connections", "blocked_sessions_max", "lock_wait_count_max",
+    "db_xact_commit_delta", "db_xact_rollback_delta", "db_deadlocks_delta", "db_cache_hit_ratio",
+    "host_cpu_avg_percent", "host_memory_avg_percent", "db_size_before_bytes", "db_size_after_bytes",
+    "telemetry_sample_count", "telemetry_error_count", "generated_at",
+)
+
+
+def summary_select(alias: str = "s") -> str:
+    return ", ".join(f"{alias}.{column}" for column in SUMMARY_COLUMNS)
+
+
 def counter_delta(start, end):
     return None if start is None or end is None else end - start
 

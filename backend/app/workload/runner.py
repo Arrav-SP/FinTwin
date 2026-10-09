@@ -7,6 +7,7 @@ from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal
+from itertools import accumulate
 from time import perf_counter
 from uuid import UUID, uuid4
 
@@ -49,19 +50,37 @@ class WorkloadRunner:
     def __init__(self, config: WorkloadConfig):
         self.config = config
         self.random = random.Random(config.seed)
+        self._account_ids: list[int] = []
+        self._account_weights: list[float] | None = None
 
     def run(self, telemetry_collector=None) -> WorkloadResult:
         experiment_id = uuid4()
         started_at = datetime.now(timezone.utc)
-        started_clock = perf_counter()
         self._create_experiment(experiment_id, started_at)
+        try:
+            self._set_account_ids(self._load_account_ids())
+            if telemetry_collector is not None:
+                telemetry_collector.start(experiment_id)
+            try:
+                result = self._execute(experiment_id, started_at)
+            finally:
+                if telemetry_collector is not None:
+                    telemetry_collector.stop()
+            self._complete_experiment(result)
+        except BaseException:
+            self._fail_experiment(experiment_id)
+            raise
         if telemetry_collector is not None:
-            telemetry_collector.start(experiment_id)
+            telemetry_collector.finalize(result)
+        return result
+
+    def _execute(self, experiment_id: UUID, started_at: datetime) -> WorkloadResult:
         requested = max(1, round(self.config.target_tps * self.config.duration_seconds))
+        offsets = self._arrival_offsets(requested)
         futures: list[Future[OperationResult]] = []
+        started_clock = perf_counter()
         with ThreadPoolExecutor(max_workers=self.config.concurrency, thread_name_prefix="fintwin-worker") as executor:
-            for index in range(requested):
-                target_offset = index / self.config.target_tps
+            for index, target_offset in enumerate(offsets):
                 remaining = target_offset - (perf_counter() - started_clock)
                 if remaining > 0:
                     time.sleep(remaining)
@@ -72,12 +91,38 @@ class WorkloadRunner:
         elapsed = max(perf_counter() - started_clock, 1e-9)
         successful = sum(result.success for result in results)
         latency = summarize_latencies(result.latency_ms for result in results)
-        result = WorkloadResult(experiment_id, self.config.scenario.value, requested, len(results), successful, len(results) - successful, len(results) / elapsed, latency["average_latency_ms"] or 0.0, latency["p50_latency_ms"], latency["p95_latency_ms"], latency["p99_latency_ms"], started_at, completed_at)
-        self._complete_experiment(result)
-        if telemetry_collector is not None:
-            telemetry_collector.stop()
-            telemetry_collector.finalize(result)
-        return result
+        return WorkloadResult(experiment_id, self.config.scenario.value, requested, len(results), successful, len(results) - successful, len(results) / elapsed, latency["average_latency_ms"] or 0.0, latency["p50_latency_ms"], latency["p95_latency_ms"], latency["p99_latency_ms"], started_at, completed_at)
+
+    def _arrival_offsets(self, requested: int) -> list[float]:
+        """Scheduled submission time of each operation, in seconds from the start of the run.
+
+        Burstiness blends evenly spaced arrivals (0) with exponentially distributed gaps (1);
+        the mean gap, and so the target rate, is the same at every setting.
+        """
+        mean_gap = 1 / self.config.target_tps
+        burstiness = self.config.burstiness
+        if burstiness == 0:
+            return [index * mean_gap for index in range(requested)]
+        rng = random.Random(f"arrivals-{self.config.seed}")
+        offsets, clock = [], 0.0
+        for _ in range(requested):
+            offsets.append(clock)
+            clock += (1 - burstiness) * mean_gap + burstiness * rng.expovariate(1 / mean_gap)
+        return offsets
+
+    def _load_account_ids(self) -> list[int]:
+        with engine.connect() as connection:
+            return list(connection.execute(text("SELECT account_id FROM accounts WHERE status = 'ACTIVE' ORDER BY account_id")).scalars().all())
+
+    def _set_account_ids(self, ids: list[int]) -> None:
+        self._account_ids = ids
+        skew = self.config.account_skew
+        # Zipf-like popularity: the account at rank r is chosen in proportion to 1 / r^skew.
+        self._account_weights = list(accumulate(1 / rank ** skew for rank in range(1, len(ids) + 1))) if skew > 0 else None
+
+    def _fail_experiment(self, experiment_id: UUID) -> None:
+        with engine.begin() as connection:
+            connection.execute(text("UPDATE experiment_runs SET status = 'FAILED', completed_at = :completed_at WHERE experiment_id = :experiment_id"), {"completed_at": datetime.now(timezone.utc), "experiment_id": experiment_id})
 
     def _create_experiment(self, experiment_id: UUID, started_at: datetime) -> None:
         with engine.begin() as connection:
@@ -126,11 +171,16 @@ class WorkloadRunner:
         return result
 
     def _account_pair(self, rng: random.Random) -> tuple[int, int]:
-        with engine.connect() as connection:
-            ids = connection.execute(text("SELECT account_id FROM accounts WHERE status = 'ACTIVE' ORDER BY account_id LIMIT 1000")).scalars().all()
+        ids = self._account_ids
         if len(ids) < 2:
             raise RuntimeError("At least two active accounts are required")
-        source, destination = rng.sample(ids, 2)
+        if self._account_weights is None:
+            source, destination = rng.sample(ids, 2)
+            return source, destination
+        source = rng.choices(ids, cum_weights=self._account_weights, k=1)[0]
+        destination = source
+        while destination == source:
+            destination = rng.choices(ids, cum_weights=self._account_weights, k=1)[0]
         return source, destination
 
     def _read_balance(self, rng: random.Random) -> None:
@@ -172,4 +222,4 @@ class WorkloadRunner:
             connection.execute(text("INSERT INTO workload_events (experiment_id, operation, latency_ms, success, error_message, recorded_at) VALUES (:experiment_id, :operation, :latency_ms, :success, :error_message, :recorded_at)"), {"experiment_id": experiment_id, "operation": result.operation, "latency_ms": result.latency_ms, "success": result.success, "error_message": result.error, "recorded_at": datetime.now(timezone.utc)})
 
     def _configuration_json(self) -> str:
-        return json.dumps({"concurrency": self.config.concurrency, "target_tps": self.config.target_tps, "duration_seconds": self.config.duration_seconds, "operation_mix": dict(self.config.operation_mix), "seed": self.config.seed, "burstiness": self.config.burstiness})
+        return json.dumps({"concurrency": self.config.concurrency, "target_tps": self.config.target_tps, "duration_seconds": self.config.duration_seconds, "operation_mix": dict(self.config.operation_mix), "seed": self.config.seed, "burstiness": self.config.burstiness, "account_skew": self.config.account_skew})

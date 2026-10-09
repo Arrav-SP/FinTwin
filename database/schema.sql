@@ -150,11 +150,13 @@ CREATE INDEX IF NOT EXISTS idx_telemetry_samples_experiment_time ON telemetry_sa
 CREATE TABLE IF NOT EXISTS experiment_summaries (
     experiment_id UUID PRIMARY KEY REFERENCES experiment_runs(experiment_id) ON DELETE CASCADE,
     error_rate NUMERIC(10,6), p50_latency_ms NUMERIC(18,4), p95_latency_ms NUMERIC(18,4), p99_latency_ms NUMERIC(18,4),
-    active_connections_max INTEGER, blocked_sessions_max INTEGER, lock_wait_count_max BIGINT,
+    active_connections_max INTEGER, max_connections INTEGER, blocked_sessions_max INTEGER, lock_wait_count_max BIGINT,
     db_xact_commit_delta BIGINT, db_xact_rollback_delta BIGINT, db_deadlocks_delta BIGINT, db_cache_hit_ratio NUMERIC(10,4),
     host_cpu_avg_percent NUMERIC(10,4), host_memory_avg_percent NUMERIC(10,4), db_size_before_bytes BIGINT, db_size_after_bytes BIGINT,
     telemetry_sample_count INTEGER NOT NULL DEFAULT 0, telemetry_error_count INTEGER NOT NULL DEFAULT 0, generated_at TIMESTAMPTZ NOT NULL
 );
+
+ALTER TABLE experiment_summaries ADD COLUMN IF NOT EXISTS max_connections INTEGER;
 
 CREATE TABLE IF NOT EXISTS validation_experiments (
     validation_id UUID PRIMARY KEY,
