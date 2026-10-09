@@ -82,3 +82,32 @@
   transition: background-color 120ms, border-color 120ms;
   &:hover { background: var(--color-slate); border-color: var(--color-pencil); }
 }
+
+@utility field {
+  min-height: 2.5rem;
+  width: 100%;
+  padding: 0 0.75rem;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-well);
+  &::placeholder { color: var(--color-pencil); }
+  &:hover { border-color: var(--color-pencil); }
+  &[aria-invalid="true"] { border-color: var(--color-red); }
+}
+
+/* The one filled button on a page: paper on ink. The signal colour is reserved for measured data. */
+@utility primary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 1.125rem;
+  border: 1px solid var(--color-paper);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 120ms;
+  &:hover { background: #ffffff; }
+  &:disabled { cursor: progress; opacity: 0.6; }
+}

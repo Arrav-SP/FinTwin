@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import type { Experiment } from "../api/types";
 import { formatDateTime, formatInteger, formatNumber, scenarioLabel, shortId, toNumber } from "../lib/format";
 import { deliveredShare } from "../lib/runSummary";
@@ -45,7 +46,9 @@ export function RunsTable({ runs, caption }: { runs: Experiment[]; caption: stri
               <tr key={run.experiment_id} className="border-b border-rule transition-colors hover:bg-slate/50">
                 <td className={`${CELL} whitespace-nowrap text-graphite`}>{formatDateTime(run.started_at)}</td>
                 <td className={CELL}>
-                  {scenarioLabel(run.scenario)}
+                  <Link to={`/experiments/${run.experiment_id}`} className="text-paper underline decoration-rule-strong underline-offset-4 hover:decoration-paper">
+                    {scenarioLabel(run.scenario)}
+                  </Link>
                   {run.status !== "COMPLETED" && <span className={`ml-2 text-xs ${run.status === "FAILED" ? "text-red" : "text-amber"}`}>{run.status === "FAILED" ? "failed" : "running"}</span>}
                 </td>
                 <td className={`${CELL} text-right`}>{formatInteger(run.configuration.concurrency)}</td>

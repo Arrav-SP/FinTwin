@@ -2,20 +2,13 @@ import { useMemo, useState } from "react";
 import { useExperiments } from "../api/queries";
 import type { RunStatus } from "../api/types";
 import { RunsTable } from "../components/RunsTable";
-import { Section } from "../components/Section";
+import { PageIntro, Section } from "../components/Section";
 import { Command, EmptyState, ErrorState, Placeholder } from "../components/States";
 import { scenarioLabel } from "../lib/format";
 
 const FIELD = "min-h-9 rounded-control border border-rule-strong bg-well px-3 placeholder:text-pencil";
 
-function PageTitle() {
-  return (
-    <header className="mb-10">
-      <h1 className="serif text-lede leading-[1.08]">Experiments</h1>
-      <p className="mt-4 max-w-[62ch] text-base text-graphite">Every workload run against PostgreSQL, newest first.</p>
-    </header>
-  );
-}
+const PageTitle = () => <PageIntro title="Experiments">Every workload run against PostgreSQL, newest first.</PageIntro>;
 
 export function Experiments() {
   const experiments = useExperiments();

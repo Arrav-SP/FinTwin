@@ -75,3 +75,97 @@ export interface ValidationSummary {
   pending_or_failed_count: number;
   overall: Partial<Record<Target, TargetAccuracy>>;
 }
+
+export interface ExperimentDetail extends Experiment {
+  requested_operations: number | null;
+  completed_operations: number | null;
+  error_rate: Numeric;
+  active_connections_max: number | null;
+  max_connections: number | null;
+  blocked_sessions_max: number | null;
+  db_deadlocks_delta: number | null;
+  db_cache_hit_ratio: Numeric;
+  host_memory_avg_percent: Numeric;
+}
+
+export interface TelemetrySample {
+  sample_kind: "INITIAL" | "SAMPLE" | "FINAL";
+  captured_at: string;
+  active_connections: number | null;
+  waiting_connections: number | null;
+  blocked_sessions: number | null;
+  lock_wait_count: number | null;
+  cache_hit_ratio: Numeric;
+  host_cpu_percent: Numeric;
+  host_memory_percent: Numeric;
+}
+
+export interface ExperimentDetailResponse {
+  experiment: ExperimentDetail;
+  telemetry: TelemetrySample[];
+  validations: Pick<Validation, "validation_id" | "validation_status" | "predicted_metrics" | "actual_metrics" | "error_metrics" | "created_at">[];
+}
+
+export interface OperationLatency {
+  operation: string;
+  count: number;
+  failed: number;
+  average_latency_ms: number;
+  p50_latency_ms: number;
+  p95_latency_ms: number;
+  max_latency_ms: number;
+  average_queue_wait_ms: number | null;
+}
+
+export interface HistogramBucket {
+  lower_ms: number;
+  upper_ms: number | null;
+  count: number;
+}
+
+export interface LatencyBreakdown {
+  count: number;
+  operations: OperationLatency[];
+  histogram: HistogramBucket[];
+}
+
+export interface ModelCard {
+  target: Target;
+  algorithm: string;
+  training_samples: number;
+  test_samples: number;
+  metrics: { mae: number; rmse: number; r2: number };
+  scenario_values: string[];
+  numeric_ranges: Record<string, number[]>;
+  trained_at: string;
+}
+
+export interface ScenarioCatalogue {
+  scenarios: { scenario: string; operation_mix: Record<string, number> }[];
+  limits: { max_concurrency: number; max_target_tps: number; max_duration_seconds: number };
+}
+
+/** What a person chooses when describing a workload. */
+export interface WorkloadInput {
+  scenario: string;
+  concurrency: number;
+  target_tps: number;
+  duration_seconds: number;
+  account_skew: number;
+}
+
+export interface Prediction {
+  workload: WorkloadInput;
+  predictions: Record<string, number>;
+  warnings: string[];
+}
+
+export type SweepParameter = "concurrency" | "target_tps";
+
+export interface Sweep {
+  parameter: SweepParameter;
+  values: number[];
+  model_derived_sensitivity: Record<string, number>;
+  results: { configuration: WorkloadInput; predictions: Record<string, number>; warnings: string[] }[];
+  warnings: string[];
+}

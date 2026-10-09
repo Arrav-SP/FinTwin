@@ -25,7 +25,7 @@ A database-performance test bench, not a personal-finance or LLM app. There is n
 | `backend/app/ml/` | `dataset.py`, `features.py` (12 feature columns, `remainder="drop"`), `train.py` (LR / RF / GBM, GroupShuffleSplit, best by MAE), `predict.py` (range warnings) |
 | `backend/app/what_if.py`, `optimization.py`, `validation.py` | comparison and sweeps; six threshold rules; predict-run-compare |
 | `frontend/` | Old UI, still served by FastAPI at port 8000: `index.html`, `styles.css`, `app.js`; six views; no framework. To be retired when `web/` covers every page |
-| `web/` | New UI (F1, redesigned 2026-10-10). React 19 + TypeScript + Vite 8 + Tailwind 4 + TanStack Query + React Router 8 + Recharts. Read `web/DESIGN.md` before touching it. Tokens in `src/styles.css`; top-bar shell in `src/app/`; typed API in `src/api/`; pages Overview and Experiments. Rule: measured = filled signal colour, predicted = hollow dashed. Serif Newsreader for statements, IBM Plex Sans for the interface. No cards, no sidebar, no icons |
+| `web/` | New UI (F1, redesigned 2026-10-10). React 19 + TypeScript + Vite 8 + Tailwind 4 + TanStack Query + React Router 8 + Recharts. Read `web/DESIGN.md` before touching it. Tokens in `src/styles.css`; top-bar shell in `src/app/`; typed API in `src/api/`; pages Overview, Experiments, run detail (`/experiments/:id`), Predict and What if (F2, 2026-10-10). Rule: measured = filled signal colour, predicted = hollow dashed. Serif Newsreader for statements, IBM Plex Sans for the interface. No cards, no sidebar, no icons |
 | `scripts/` | CLI entry points (seed, run_workload, train_models, what_if, validate_prediction, run_benchmark, ...) |
 | `tests/` | 8 modules, 24 cases; only `test_phase1.py` (4 cases) needs PostgreSQL |
 | `artifacts/` | git-ignored: 5 models (`.joblib` + `.json`), `validation.json`, `benchmark.csv`, sweep CSVs |
@@ -56,7 +56,7 @@ Fixed, each with a test in `tests/test_m1_logic.py` or `tests/test_m1_database.p
 
 ## Running the new UI
 
-`.claude/launch.json` defines `fintwin-api` (port 8000) and `fintwin-web` (Vite, port 5173, proxies `/api`). Manually: `npm --prefix web run dev`. Checks: `npm --prefix web test` (32 tests), `npm --prefix web run typecheck`, `npm --prefix web run build`. Bash heredocs containing JSX or triple quotes fail in this environment; use the Write tool for such files. Browser screenshots only work while the Browser pane is displayed; otherwise verify through the DOM.
+`.claude/launch.json` defines `fintwin-api` (port 8000) and `fintwin-web` (Vite, port 5173, proxies `/api`). Manually: `npm --prefix web run dev`. Checks: `npm --prefix web test` (49 tests), `npm --prefix web run typecheck`, `npm --prefix web run build`. Bash heredocs containing JSX or triple quotes fail in this environment; use the Write tool for such files. Browser screenshots only work while the Browser pane is displayed; otherwise verify through the DOM.
 
 ## Milestone 2 (done 2026-10-10): API for the new UI
 
@@ -91,6 +91,6 @@ Tests in `tests/test_m2_logic.py` and `tests/test_m2_database.py`. Full backend 
 
 Roadmap approved by the user on 2026-10-10, to be done one milestone at a time with a checkpoint after each. Changes stay local: no commits, no pushes. A source backup and a database dump from before M1 are in `..\FinTwin_backup_2026-10-10`.
 
-Order: M1 backend correctness (done) -> F1 frontend foundation (done 2026-10-10) (React + TypeScript + Vite, design tokens, app shell, typed API client, Overview page) -> M2 new API endpoints (done 2026-10-10) -> F2/F3 pages -> M3 experiment campaign and retraining -> F4 polish -> M4 study, report and slides.
+Order: M1 backend correctness (done) -> F1 frontend foundation (done 2026-10-10) (React + TypeScript + Vite, design tokens, app shell, typed API client, Overview page) -> M2 new API endpoints (done 2026-10-10) -> F2 core pages (done 2026-10-10: run detail, Predict, What if) -> F3 action pages (Run, Validation, Advisor, Models; use `/api/jobs`) -> M3 experiment campaign and retraining -> F4 polish -> M4 study, report and slides.
 
 Open decisions: the user has not said whether they want an LLM copilot (default: no, build an evidence-based "Analyst" panel) and has not given a deadline. Installing npm packages for F1 needs their go-ahead.

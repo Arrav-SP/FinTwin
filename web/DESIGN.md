@@ -23,6 +23,7 @@ The page opens with a finding in words, built from the latest run's own values (
 - Sentence case everywhere. No all-caps labels, no labels above headings.
 - Name things as the reader sees them: "Requested", "Delivered", "Lock requests waiting", not field names.
 - A button says what it does and keeps that name ("Read again", then "Reading").
+- One filled button per page (class `primary`: paper on ink). Everything else is an outlined `control` or an underlined link.
 - An empty screen says what to run to fill it. An error repeats the server's reason and offers one action.
 - Never print a number the API did not return. A missing value is a dash; a percentage that is not defined says "not defined".
 
@@ -73,6 +74,13 @@ The serif is the editorial voice and appears only where the interface is saying 
 | `EvidenceGap` | One metric per row, each on its own scale from zero; values in columns, track beneath |
 | `RunsTable` | Units in column heads; figures right-aligned and tabular; status shown only when a run did not complete |
 | `Segmented` | Underlined text buttons with `aria-pressed`, for re-plotting one chart |
+| `PageIntro` | Opens a page that is a tool (Predict, What if, Experiments): serif title and one line on what it does |
+| `WorkloadForm` | The shared workload inputs; limits and scenarios come from `/api/scenarios`. Class `field` for inputs |
+| `PredictedFigures` | Predicted values with a dashed rule beneath each, never the filled style |
+| `TrainedRange`, `Cautions`, `ModelProvenance` | Each input against the trained range (amber when outside), the model's own warnings, and when and on how many runs it was fitted |
+| `SweepChart` | Predictions across one setting: dashed paper line, hollow points, a slate band for the trained range |
+| `TelemetryChart` | One sampled measurement across a run: solid signal line, time in seconds on x |
+| `LatencyBreakdown` | Filled horizontal bars for the latency histogram beside a per-operation table |
 | `Placeholder`, `EmptyState`, `ErrorState` | Shaped like the content; a left rule, a serif line, a plain explanation |
 
 ## Charts
