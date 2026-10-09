@@ -132,6 +132,8 @@ CREATE TABLE IF NOT EXISTS workload_events (
     recorded_at TIMESTAMPTZ NOT NULL
 );
 
+ALTER TABLE workload_events ADD COLUMN IF NOT EXISTS queue_wait_ms NUMERIC(18, 4) CHECK (queue_wait_ms >= 0);
+
 CREATE INDEX IF NOT EXISTS idx_workload_events_experiment_id ON workload_events(experiment_id);
 CREATE INDEX IF NOT EXISTS idx_workload_events_recorded_at ON workload_events(recorded_at);
 

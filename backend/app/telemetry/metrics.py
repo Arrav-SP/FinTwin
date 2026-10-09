@@ -39,6 +39,43 @@ def summary_select(alias: str = "s") -> str:
     return ", ".join(f"{alias}.{column}" for column in SUMMARY_COLUMNS)
 
 
+# Upper edges of the latency histogram, in milliseconds (1-2-5 steps); the last bucket is open-ended.
+HISTOGRAM_EDGES_MS = (1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000)
+
+
+def latency_breakdown(events) -> dict:
+    """Per-operation latency statistics and an overall histogram for one run's events."""
+    events = list(events)
+    if not events:
+        return {"count": 0, "operations": [], "histogram": []}
+    grouped: dict[str, list] = {}
+    for event in events:
+        grouped.setdefault(event["operation"], []).append(event)
+    operations = []
+    for operation in sorted(grouped):
+        rows = grouped[operation]
+        latencies = [float(row["latency_ms"]) for row in rows]
+        waits = [float(row["queue_wait_ms"]) for row in rows if row["queue_wait_ms"] is not None]
+        operations.append({
+            "operation": operation,
+            "count": len(rows),
+            "failed": sum(1 for row in rows if not row["success"]),
+            "average_latency_ms": sum(latencies) / len(latencies),
+            "p50_latency_ms": percentile(latencies, 50),
+            "p95_latency_ms": percentile(latencies, 95),
+            "max_latency_ms": max(latencies),
+            "average_queue_wait_ms": sum(waits) / len(waits) if waits else None,
+        })
+    # Buckets are (lower, upper]; the first one also takes a latency of exactly zero.
+    histogram, lower = [], 0.0
+    all_latencies = [float(event["latency_ms"]) for event in events]
+    for upper in (*HISTOGRAM_EDGES_MS, None):
+        count = sum(1 for value in all_latencies if (value > lower or lower == 0) and (upper is None or value <= upper))
+        histogram.append({"lower_ms": lower, "upper_ms": upper, "count": count})
+        lower = upper
+    return {"count": len(events), "operations": operations, "histogram": histogram}
+
+
 def counter_delta(start, end):
     return None if start is None or end is None else end - start
 

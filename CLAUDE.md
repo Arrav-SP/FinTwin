@@ -18,13 +18,14 @@ A database-performance test bench, not a personal-finance or LLM app. There is n
 | Path | Contents |
 |---|---|
 | `database/schema.sql` | 6 banking tables (branches, customers, accounts, merchants, transactions, loans), 5 platform tables (experiment_runs, workload_events, telemetry_samples, experiment_summaries, validation_experiments), 15 explicit indexes |
-| `backend/app/main.py` | FastAPI app, 12 `/api` endpoints, serves `frontend/` |
+| `backend/app/main.py` | FastAPI app, 18 `/api` endpoints, serves `frontend/` |
 | `backend/app/services/transfer_service.py` | `transfer_funds`: one transaction, both rows locked `ORDER BY account_id FOR UPDATE` |
 | `backend/app/workload/` | `config.py` (7 scenarios, 7 operation types, `WorkloadConfig`), `runner.py` (thread pool, open-loop pacing) |
 | `backend/app/telemetry/` | `collector.py` (1 s sampler over pg_stat_activity, pg_stat_database, pg_locks, psutil), `metrics.py` |
 | `backend/app/ml/` | `dataset.py`, `features.py` (12 feature columns, `remainder="drop"`), `train.py` (LR / RF / GBM, GroupShuffleSplit, best by MAE), `predict.py` (range warnings) |
 | `backend/app/what_if.py`, `optimization.py`, `validation.py` | comparison and sweeps; six threshold rules; predict-run-compare |
-| `frontend/` | `index.html`, `styles.css`, `app.js`; six views; no framework |
+| `frontend/` | Old UI, still served by FastAPI at port 8000: `index.html`, `styles.css`, `app.js`; six views; no framework. To be retired when `web/` covers every page |
+| `web/` | New UI (F1, redesigned 2026-10-10). React 19 + TypeScript + Vite 8 + Tailwind 4 + TanStack Query + React Router 8 + Recharts. Read `web/DESIGN.md` before touching it. Tokens in `src/styles.css`; top-bar shell in `src/app/`; typed API in `src/api/`; pages Overview and Experiments. Rule: measured = filled signal colour, predicted = hollow dashed. Serif Newsreader for statements, IBM Plex Sans for the interface. No cards, no sidebar, no icons |
 | `scripts/` | CLI entry points (seed, run_workload, train_models, what_if, validate_prediction, run_benchmark, ...) |
 | `tests/` | 8 modules, 24 cases; only `test_phase1.py` (4 cases) needs PostgreSQL |
 | `artifacts/` | git-ignored: 5 models (`.joblib` + `.json`), `validation.json`, `benchmark.csv`, sweep CSVs |
@@ -53,11 +54,29 @@ A database-performance test bench, not a personal-finance or LLM app. There is n
 
 Fixed, each with a test in `tests/test_m1_logic.py` or `tests/test_m1_database.py`: detail/advisor NULL overwrite; failed runs now marked `FAILED` with telemetry stopped; `max_connections` stored in `experiment_summaries` (advisor connection rule now live); what-if default duration; R-squared withheld when all validations share one configuration; input bounds. Full suite: 43 passed (`python -m pytest -p no:cacheprovider`, database up).
 
+## Running the new UI
+
+`.claude/launch.json` defines `fintwin-api` (port 8000) and `fintwin-web` (Vite, port 5173, proxies `/api`). Manually: `npm --prefix web run dev`. Checks: `npm --prefix web test` (32 tests), `npm --prefix web run typecheck`, `npm --prefix web run build`. Bash heredocs containing JSX or triple quotes fail in this environment; use the Write tool for such files. Browser screenshots only work while the Browser pane is displayed; otherwise verify through the DOM.
+
+## Milestone 2 (done 2026-10-10): API for the new UI
+
+Tests in `tests/test_m2_logic.py` and `tests/test_m2_database.py`. Full backend suite: 61 passed.
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/jobs` (202), `GET /api/jobs`, `GET /api/jobs/{id}` | Run a workload or a validation in the background. `backend/app/jobs.py`: in-memory, one job at a time so measurements never overlap; jobs are lost on restart, their experiments are not. Body: `{kind: "workload"|"validation", workload: {...}, seed, telemetry_interval}` |
+| `GET /api/models` | Per-target model card from `artifacts/models/*.json` plus `trained_at` (`ml/registry.py`) |
+| `GET /api/scenarios` | The seven default mixes and the input limits |
+| `POST /api/what-if/sweep` | `{baseline, parameter: "concurrency"|"target_tps", values}` -> predictions per value and sensitivity |
+| `GET /api/experiments/{id}/latency` | Per-operation latency and queue-wait statistics plus a 1-2-5 histogram |
+
+`workload_events.queue_wait_ms` now records how long each operation waited for a worker; latency remains service time only. `WorkloadRequest` accepts `account_skew` and is bounded like the validation request. The API has 18 endpoints. The old synchronous `POST /api/validation` is kept for the old UI.
+
 ## Known open issues
 
 1. `frontend/app.js` defines `validationPage` twice (goes away with the frontend rebuild).
 2. API has no authentication; PostgreSQL port 5432 is published by Docker. Local use only.
-3. Queue-wait time is not recorded per operation (planned with the M2 endpoints).
+3. Endpoints return plain dicts, so the OpenAPI schema has no response types; the `web/` types are written by hand in `src/api/types.ts`.
 4. `README.md`, `docs/` and both PPT decks are out of date (planned for M4).
 
 ## Documents
@@ -72,6 +91,6 @@ Fixed, each with a test in `tests/test_m1_logic.py` or `tests/test_m1_database.p
 
 Roadmap approved by the user on 2026-10-10, to be done one milestone at a time with a checkpoint after each. Changes stay local: no commits, no pushes. A source backup and a database dump from before M1 are in `..\FinTwin_backup_2026-10-10`.
 
-Order: M1 backend correctness (done) -> F1 frontend foundation (React + TypeScript + Vite, design tokens, app shell, typed API client, Overview page) -> M2 new API endpoints (background jobs, model metadata, sweeps, latency distribution) -> F2/F3 pages -> M3 experiment campaign and retraining -> F4 polish -> M4 study, report and slides.
+Order: M1 backend correctness (done) -> F1 frontend foundation (done 2026-10-10) (React + TypeScript + Vite, design tokens, app shell, typed API client, Overview page) -> M2 new API endpoints (done 2026-10-10) -> F2/F3 pages -> M3 experiment campaign and retraining -> F4 polish -> M4 study, report and slides.
 
 Open decisions: the user has not said whether they want an LLM copilot (default: no, build an evidence-based "Analyst" panel) and has not given a deadline. Installing npm packages for F1 needs their go-ahead.

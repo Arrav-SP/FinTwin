@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -11,9 +12,12 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from .database import check_connection, engine
-from .telemetry.metrics import summary_select
+from .jobs import JobManager
+from .telemetry import TelemetryCollector
+from .telemetry.metrics import latency_breakdown, summary_select
 from .validation import get_validation, list_validations, run_validation, validation_summary
-from .workload import Scenario, WorkloadConfig
+from .workload import Scenario, WorkloadConfig, WorkloadRunner
+from .workload.config import DEFAULT_MIXES
 from .workload.config import MAX_CONCURRENCY
 
 MAX_TARGET_TPS = 1000.0
@@ -24,6 +28,7 @@ FRONTEND_ROOT = APP_ROOT / "frontend"
 
 app = FastAPI(title="FinTwin API", version="7.0.0")
 app.mount("/assets", StaticFiles(directory=FRONTEND_ROOT), name="assets")
+jobs = JobManager()
 
 
 class ValidationRequest(BaseModel):
@@ -37,11 +42,12 @@ class ValidationRequest(BaseModel):
 
 class WorkloadRequest(BaseModel):
     scenario: Scenario = Scenario.NORMAL_DAY
-    concurrency: int = Field(default=10, ge=1)
-    target_tps: float = Field(default=10.0, gt=0)
-    duration_seconds: float = Field(default=10.0, gt=0)
+    concurrency: int = Field(default=10, ge=1, le=MAX_CONCURRENCY)
+    target_tps: float = Field(default=10.0, gt=0, le=MAX_TARGET_TPS)
+    duration_seconds: float = Field(default=10.0, gt=0, le=MAX_DURATION_SECONDS)
     operation_mix: dict[str, float] | None = None
     burstiness: float = Field(default=0.0, ge=0, le=1)
+    account_skew: float = Field(default=0.0, ge=0, le=3)
 
     def workload(self) -> dict[str, Any]:
         return self.model_dump(mode="json", exclude_none=True)
@@ -50,6 +56,23 @@ class WorkloadRequest(BaseModel):
 class WhatIfRequest(BaseModel):
     baseline: WorkloadRequest
     modified: WorkloadRequest
+
+
+class SweepRequest(BaseModel):
+    baseline: WorkloadRequest
+    parameter: Literal["concurrency", "target_tps"]
+    values: list[float] = Field(min_length=2, max_length=24)
+
+
+class JobRequest(BaseModel):
+    kind: Literal["workload", "validation"]
+    workload: WorkloadRequest
+    seed: int = 42
+    telemetry_interval: float = Field(default=1.0, gt=0, le=10)
+
+    def config(self) -> WorkloadConfig:
+        w = self.workload
+        return WorkloadConfig(scenario=w.scenario, concurrency=w.concurrency, target_tps=w.target_tps, duration_seconds=w.duration_seconds, operation_mix=w.operation_mix, seed=self.seed, burstiness=w.burstiness, account_skew=w.account_skew)
 
 
 def _configuration(value: Any) -> dict[str, Any]:
@@ -230,3 +253,81 @@ def create_validation(request: ValidationRequest) -> dict:
     except SQLAlchemyError as exc:
         raise HTTPException(status_code=503, detail="Database unavailable") from exc
 
+
+
+@app.get("/api/scenarios")
+def scenarios() -> dict[str, Any]:
+    return {
+        "scenarios": [{"scenario": scenario.value, "operation_mix": mix} for scenario, mix in DEFAULT_MIXES.items()],
+        "limits": {"max_concurrency": MAX_CONCURRENCY, "max_target_tps": MAX_TARGET_TPS, "max_duration_seconds": MAX_DURATION_SECONDS},
+    }
+
+
+@app.get("/api/models")
+def models() -> list[dict[str, Any]]:
+    from .ml.registry import describe_models
+
+    return describe_models(APP_ROOT / "artifacts" / "models")
+
+
+@app.post("/api/what-if/sweep")
+def what_if_sweep(request: SweepRequest) -> dict[str, Any]:
+    try:
+        from .what_if import sensitivity_analysis
+
+        values = [int(value) for value in request.values] if request.parameter == "concurrency" else request.values
+        return sensitivity_analysis(request.baseline.workload(), request.parameter, values)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/api/experiments/{experiment_id}/latency")
+def experiment_latency(experiment_id: str) -> dict[str, Any]:
+    try:
+        with engine.connect() as connection:
+            exists = connection.execute(text("SELECT 1 FROM experiment_runs WHERE experiment_id = :id"), {"id": experiment_id}).first()
+            if exists is None:
+                raise HTTPException(status_code=404, detail="Experiment not found")
+            events = connection.execute(text("SELECT operation, latency_ms, queue_wait_ms, success FROM workload_events WHERE experiment_id = :id"), {"id": experiment_id}).mappings().all()
+        return latency_breakdown(events)
+    except HTTPException:
+        raise
+    except SQLAlchemyError as exc:
+        raise HTTPException(status_code=503, detail="Database unavailable") from exc
+
+
+def _run_workload_job(config: WorkloadConfig, telemetry_interval: float) -> dict[str, Any]:
+    result = WorkloadRunner(config).run(TelemetryCollector(telemetry_interval))
+    return {"experiment_id": str(result.experiment_id)}
+
+
+def _run_validation_job(config: WorkloadConfig, telemetry_interval: float) -> dict[str, Any]:
+    record = run_validation(config, telemetry_interval=telemetry_interval)
+    if record["validation_status"] != "COMPLETED":
+        raise RuntimeError(record.get("error_message") or "Validation did not complete")
+    return jsonable_encoder({"validation_id": record["validation_id"], "experiment_id": record["actual_experiment_id"]})
+
+
+@app.post("/api/jobs", status_code=202)
+def submit_job(request: JobRequest) -> dict[str, Any]:
+    try:
+        config = request.config()
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    work = _run_workload_job if request.kind == "workload" else _run_validation_job
+    return jobs.submit(request.kind, request.model_dump(mode="json"), lambda: work(config, request.telemetry_interval))
+
+
+@app.get("/api/jobs")
+def list_jobs() -> list[dict[str, Any]]:
+    return jobs.list()
+
+
+@app.get("/api/jobs/{job_id}")
+def job_detail(job_id: str) -> dict[str, Any]:
+    job = jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job

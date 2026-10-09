@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/*
+ * FinTwin design tokens. See web/DESIGN.md for the rules behind them.
+ *
+ * Ink:   a measured value is filled with the signal colour.
+ * Chalk: a predicted value is drawn hollow and dashed in the text colour.
+ * No other element may use the signal colour as a fill.
+ */
+@theme {
+  --color-ink: #0d1826;
+  --color-well: #0a1420;
+  --color-slate: #16263a;
+  --color-rule: #24364d;
+  --color-rule-strong: #3a5170;
+  --color-paper: #eef1ec;
+  --color-graphite: #a8b5c5;
+  --color-pencil: #8192a8;
+  --color-signal: #4cc2a8;
+  --color-amber: #e5b454;
+  --color-red: #f0766e;
+
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Newsreader Variable", "Iowan Old Style", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+
+  /* 13 / 15 / 18 / 24, plus a fluid lede. Nothing is set smaller than 13px. */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.125rem;
+  --text-lg: 1.5rem;
+  --text-figure: 2.25rem;
+  --text-lede: clamp(1.75rem, 1.1rem + 2.4vw, 2.875rem);
+
+  --radius-control: 4px;
+  --breakpoint-wide: 72rem;
+}
+
+@layer base {
+  html { color-scheme: dark; scroll-padding-top: 5rem; }
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, p { margin: 0; }
+  h1, h2, h3 { font-weight: 500; }
+  :focus-visible { outline: 2px solid var(--color-paper); outline-offset: 3px; border-radius: 2px; }
+  ::selection { background: color-mix(in srgb, var(--color-signal) 40%, transparent); }
+  button, input, select { font: inherit; color: inherit; }
+}
+
+/* Figures line up in columns and never use old-style numerals. */
+@utility num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* The editorial voice: one serif, used for statements and section titles only. */
+@utility serif {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  font-variant-numeric: lining-nums;
+  letter-spacing: -0.012em;
+}
+
+@utility control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-control);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 120ms, border-color 120ms;
+  &:hover { background: var(--color-slate); border-color: var(--color-pencil); }
+}

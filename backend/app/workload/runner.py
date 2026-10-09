@@ -25,6 +25,7 @@ class OperationResult:
     latency_ms: float
     success: bool
     error: str | None = None
+    queue_wait_ms: float | None = None
 
 
 @dataclass(frozen=True)
@@ -85,7 +86,7 @@ class WorkloadRunner:
                 if remaining > 0:
                     time.sleep(remaining)
                 operation = self.random.choices(tuple(self.config.operation_mix), weights=tuple(self.config.operation_mix.values()), k=1)[0]
-                futures.append(executor.submit(self._execute_operation, experiment_id, operation, self.config.seed + index))
+                futures.append(executor.submit(self._execute_operation, experiment_id, operation, self.config.seed + index, perf_counter()))
         results = [future.result() for future in as_completed(futures)]
         completed_at = datetime.now(timezone.utc)
         elapsed = max(perf_counter() - started_clock, 1e-9)
@@ -143,8 +144,10 @@ class WorkloadRunner:
                 WHERE experiment_id = :experiment_id
             """), {"completed_at": result.completed_at, "requested": result.requested_operations, "completed": result.completed_operations, "successful": result.successful_operations, "failed": result.failed_operations, "actual_tps": result.actual_tps, "average_latency": result.average_latency_ms, "p50": result.p50_latency_ms, "p95": result.p95_latency_ms, "p99": result.p99_latency_ms, "error_rate": result.failed_operations / result.completed_operations if result.completed_operations else 0, "experiment_id": result.experiment_id})
 
-    def _execute_operation(self, experiment_id: UUID, operation: str, seed: int) -> OperationResult:
+    def _execute_operation(self, experiment_id: UUID, operation: str, seed: int, submitted: float | None = None) -> OperationResult:
         started = perf_counter()
+        # Time spent waiting for a free worker. The latency recorded below is service time only.
+        queue_wait_ms = None if submitted is None else max(started - submitted, 0.0) * 1000
         try:
             rng = random.Random(seed)
             if operation == "TRANSFER":
@@ -164,9 +167,9 @@ class WorkloadRunner:
                 self._loan_aggregation()
             else:
                 raise ValueError(f"Unsupported operation: {operation}")
-            result = OperationResult(operation, (perf_counter() - started) * 1000, True)
+            result = OperationResult(operation, (perf_counter() - started) * 1000, True, None, queue_wait_ms)
         except Exception as exc:
-            result = OperationResult(operation, (perf_counter() - started) * 1000, False, str(exc))
+            result = OperationResult(operation, (perf_counter() - started) * 1000, False, str(exc), queue_wait_ms)
         self._record_event(experiment_id, result)
         return result
 
@@ -219,7 +222,7 @@ class WorkloadRunner:
 
     def _record_event(self, experiment_id: UUID, result: OperationResult) -> None:
         with engine.begin() as connection:
-            connection.execute(text("INSERT INTO workload_events (experiment_id, operation, latency_ms, success, error_message, recorded_at) VALUES (:experiment_id, :operation, :latency_ms, :success, :error_message, :recorded_at)"), {"experiment_id": experiment_id, "operation": result.operation, "latency_ms": result.latency_ms, "success": result.success, "error_message": result.error, "recorded_at": datetime.now(timezone.utc)})
+            connection.execute(text("INSERT INTO workload_events (experiment_id, operation, latency_ms, queue_wait_ms, success, error_message, recorded_at) VALUES (:experiment_id, :operation, :latency_ms, :queue_wait_ms, :success, :error_message, :recorded_at)"), {"experiment_id": experiment_id, "operation": result.operation, "latency_ms": result.latency_ms, "queue_wait_ms": result.queue_wait_ms, "success": result.success, "error_message": result.error, "recorded_at": datetime.now(timezone.utc)})
 
     def _configuration_json(self) -> str:
         return json.dumps({"concurrency": self.config.concurrency, "target_tps": self.config.target_tps, "duration_seconds": self.config.duration_seconds, "operation_mix": dict(self.config.operation_mix), "seed": self.config.seed, "burstiness": self.config.burstiness, "account_skew": self.config.account_skew})
