@@ -1,0 +1,1407 @@
+{
+  "repetitions": 2,
+  "duration_seconds": 8.0,
+  "seed": 2026,
+  "runs": [
+    {
+      "experiment_id": "e1e8c8e9-68a6-46c9-8131-bb2a2dc48903",
+      "scenario": "SALARY_DAY",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 486.8974526098141,
+      "average_latency_ms": 84.7145686665984,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "8864c346-d581-4af2-88d3-6d7197f05f75",
+      "scenario": "SALARY_DAY",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 59.996235236274,
+      "average_latency_ms": 7.749730000068666,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "10289668-0bb0-4118-8b92-b7ef87ce074c",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.2220786994633,
+      "average_latency_ms": 7.525015083398709,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "fc85708d-e7a0-49f5-90e7-b015d2166db0",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 60.038239855946394,
+      "average_latency_ms": 8.439811875026257,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "dc7ddb7f-b205-4456-8e5d-3319c9fe3efb",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.091616767897637,
+      "average_latency_ms": 11.367661875556223,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "ceea7bd3-b375-408c-9cc2-4f4facf30040",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.87986753909618,
+      "average_latency_ms": 7.007006166798722,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "4e303f0c-1a33-4e7d-bb6a-6ea86b88bb4d",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 59.99035430089972,
+      "average_latency_ms": 7.530351041593046,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "99b87aa3-5fa6-4c22-8857-8686dc1077a3",
+      "scenario": "SALARY_DAY",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.08507107169366,
+      "average_latency_ms": 12.817561248812126,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "b0e9836d-59b5-4c65-8fbb-062a4e2dd668",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 60.03082132446631,
+      "average_latency_ms": 9.35835083340256,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "b0d3dab9-2b2c-48d4-82b7-2cd7e4a9b592",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 59.99742836018029,
+      "average_latency_ms": 6.501107916362041,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "c23cf13d-ef84-4df8-a09b-b967bb2d7838",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 522.904371673196,
+      "average_latency_ms": 47.705007062292374,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "5619a480-6138-42bd-9ee7-09f7984de852",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 524.821205715843,
+      "average_latency_ms": 50.57996560418966,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "742cc162-e7fa-4f98-8b31-2e059bd6f883",
+      "scenario": "MONTH_END",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 59.98592130421747,
+      "average_latency_ms": 6.608685624875458,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "a41ad022-d178-413f-accb-ab31ab2a8397",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.90469808837554,
+      "average_latency_ms": 6.93590841612604,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "c380cb24-4c87-4b1e-b66b-3145eb35dc4e",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.092397148694168,
+      "average_latency_ms": 10.01018687557007,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "ef977fdd-6f38-40a2-bf45-2392001872b0",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.87036400853,
+      "average_latency_ms": 4.671370416654099,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "d95689b3-d4fb-4946-abec-d8beb31d122c",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 490.8644953119364,
+      "average_latency_ms": 56.61551562501396,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "c3acf3e0-c796-4982-939d-790710ae91d5",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.080101281010304,
+      "average_latency_ms": 13.060248125020735,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "11895ef3-62b0-47f7-8f42-21646c0d62d0",
+      "scenario": "SALARY_DAY",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.035841365288118,
+      "average_latency_ms": 10.691797500021494,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "ea413153-3980-4b8b-bd33-d0a2dab94522",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 60.029021030192574,
+      "average_latency_ms": 8.616898958007368,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "5415d80f-8dcf-400a-93f4-b852ad914efc",
+      "scenario": "MONTH_END",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.42241416307394,
+      "average_latency_ms": 5.082829374975215,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "b85c37b3-4e62-4611-9fac-3a578d889c60",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.89455105704667,
+      "average_latency_ms": 6.648582916435164,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "7d9d0713-1935-4e14-b240-359763c14f7b",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.072560801837632,
+      "average_latency_ms": 14.318133124743326,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "8a118def-e539-42a0-b063-de15c0bf0553",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 415.3852033146174,
+      "average_latency_ms": 70.3607644374976,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "3f983948-330c-4f6d-b5ed-72158370f488",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 60.00712509602138,
+      "average_latency_ms": 7.353560208078609,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "05ced5bf-5402-47ef-a384-6c2c7b73f051",
+      "scenario": "SALARY_DAY",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.7787973108715,
+      "average_latency_ms": 6.24333208349223,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "643b06b1-9407-489f-aa51-4356df5cd0fe",
+      "scenario": "MONTH_END",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.54676701990815,
+      "average_latency_ms": 4.772032208081025,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "2601dbbf-c3c0-4c04-bf43-a120f76a7cb1",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 549.2218641794449,
+      "average_latency_ms": 70.3858690208502,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "acbdfc82-04da-423d-a25d-9d028c1c9ae6",
+      "scenario": "MONTH_END",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 556.7995579010257,
+      "average_latency_ms": 63.358148104174084,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "608fa6d5-94ba-4b01-b611-3ab2b41ba8b9",
+      "scenario": "SALARY_DAY",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.2628109547115,
+      "average_latency_ms": 6.841458166618395,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "7dc77cab-2c98-4a73-9029-f03bc4398f3e",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 60.000135750249406,
+      "average_latency_ms": 7.5036064582491235,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "075ee2ca-51e1-4459-bf8e-1673b6ff8b50",
+      "scenario": "MONTH_END",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.087578074006018,
+      "average_latency_ms": 10.822306874342758,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "073d8360-337f-456b-88a2-00dbf091d6ea",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.81247223788557,
+      "average_latency_ms": 6.0514933333737035,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "16626c23-f045-4f48-aa86-cfe4f171a011",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 59.9777579981283,
+      "average_latency_ms": 7.937244375352748,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "7c7d316b-4811-4bbb-8987-afd31a7873f5",
+      "scenario": "MONTH_END",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.7769671183895,
+      "average_latency_ms": 5.3794027500165,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "6eb6ed00-40a5-4f6b-a32f-5a7ac3d317a4",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.064764042163482,
+      "average_latency_ms": 16.019563124518754,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "a07e62ad-57b5-424d-aaf4-6e6907266510",
+      "scenario": "MONTH_END",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 59.97973434732476,
+      "average_latency_ms": 7.082731458316023,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "ba56c8dc-48fa-4c5a-8626-a82798910b6d",
+      "scenario": "SALARY_DAY",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.1557413640739,
+      "average_latency_ms": 8.863558624943835,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "07ca9847-bcbb-4307-bc1a-6fe88c511168",
+      "scenario": "MONTH_END",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.75111925542058,
+      "average_latency_ms": 4.95038408349501,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "e6a7ab61-9798-4bb6-ac93-970fd6d4c704",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 298.98263683290156,
+      "average_latency_ms": 9.249837041685774,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "3e9cdf4e-826e-420e-bfe1-81031eb395a4",
+      "scenario": "MONTH_END",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.090742096890768,
+      "average_latency_ms": 9.532066875181044,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "244920e9-b623-4659-b348-e36b15683abd",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.90424304333715,
+      "average_latency_ms": 4.882514083510614,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "93f54eb4-e390-4800-84f1-136b3bf00024",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 573.71471529031,
+      "average_latency_ms": 49.447794291691025,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "f7495521-d203-4e44-af50-4cde4f5f7c15",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.032086645190745,
+      "average_latency_ms": 8.60303500039663,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "0ba950a4-8e88-45bb-83a8-2be1910e7cc3",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.33269388432683,
+      "average_latency_ms": 5.697523916848392,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "a4d114cb-ad00-4612-bd98-2a7f648d357d",
+      "scenario": "SALARY_DAY",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 486.53357175923986,
+      "average_latency_ms": 56.84377295833656,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "a18c7b6a-cc6a-4e9b-addb-4b7b82a7308d",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.4036216684001,
+      "average_latency_ms": 8.443158333363195,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "9fd877fc-447c-4df2-b9b0-551c5a04c62b",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.79413978614008,
+      "average_latency_ms": 5.780500332984957,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "bccb98d2-ec73-4df1-b25c-f10bac55a20d",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 483.0169577294716,
+      "average_latency_ms": 80.99513487497158,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "833ece75-da1e-4069-95db-465ee7674db7",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.088603548110832,
+      "average_latency_ms": 13.370411874802812,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "a6dc595b-6ac0-4bbb-875c-a95198d40733",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 386.91971162074094,
+      "average_latency_ms": 114.04391027085997,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "7fd46ce6-855e-49f3-8713-a4a93c09b7e4",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.0919195454657,
+      "average_latency_ms": 8.176207416593874,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "ffcd0331-e4a6-47ab-8879-8d90162bfe39",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.21091349880095,
+      "average_latency_ms": 6.4370069582219,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "79be6037-6808-4670-8fd3-2b42be385bcb",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.45239141174744,
+      "average_latency_ms": 4.141413958611035,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "33380713-a0f7-4fcb-b1e1-ffb38500e7dd",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 466.87780631860653,
+      "average_latency_ms": 60.92571333322061,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "0d2c34b0-cc22-499a-9db9-71018658a738",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.094394422536784,
+      "average_latency_ms": 13.372596875433373,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "66fc73a8-2075-44dd-8cb0-42639b68b72d",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.40422302180184,
+      "average_latency_ms": 5.516801916843785,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "68035487-4ca6-4d4b-afa3-dacb6485afd3",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 485.0808875919201,
+      "average_latency_ms": 65.14962241672644,
+      "failed_operations": 680
+    },
+    {
+      "experiment_id": "0456206f-bd72-485a-acf7-5d76cceccfd9",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.32059836449395,
+      "average_latency_ms": 6.428877916635732,
+      "failed_operations": 2
+    },
+    {
+      "experiment_id": "6bac3d26-1a02-48e8-8a5c-e6a3c94a8b32",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 60.01763167972215,
+      "average_latency_ms": 8.811936041729496,
+      "failed_operations": 35
+    },
+    {
+      "experiment_id": "4e1cadfa-2cc1-41af-a9dd-a2771d7210f1",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.8058721877816,
+      "average_latency_ms": 6.513941833060623,
+      "failed_operations": 66
+    },
+    {
+      "experiment_id": "6288bb14-ead6-45a8-8c9f-0c852030ccc3",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.16230068333806,
+      "average_latency_ms": 7.586148583474521,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "2243af8e-9171-4166-8c25-35cd6cc3dc1e",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 19.998119676811967,
+      "average_latency_ms": 9.47542312578662,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "2e15a928-b623-4398-bdae-4ecdbaa268f4",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 59.99216727260053,
+      "average_latency_ms": 6.02996645869401,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "a03eabc9-6a29-447c-b7cf-9a4f3666f5b7",
+      "scenario": "MONTH_END",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 482.57554913759634,
+      "average_latency_ms": 53.2645690833912,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "7ccd0e40-bcbb-4dca-9a5e-39ee5c62c21b",
+      "scenario": "SALARY_DAY",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 59.99489443445764,
+      "average_latency_ms": 7.23764750018745,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "2d3bbdc3-e87a-4d96-9539-1bf12e933491",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.86816472208412,
+      "average_latency_ms": 7.859649416289661,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "08c95982-d29a-4f10-8fe5-f525acc567d3",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.88009030723813,
+      "average_latency_ms": 7.609245583262236,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "feedfcf6-c789-48a9-a782-76a22468f7bb",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.07857574931896,
+      "average_latency_ms": 13.698001250122616,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "6f59fdeb-ec8d-4b91-8fad-1547cffa34c3",
+      "scenario": "SALARY_DAY",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.75917227514967,
+      "average_latency_ms": 7.104724416397706,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "ff71bbb8-6ab8-4d36-b2ee-0d1eefcf7110",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 298.370957973682,
+      "average_latency_ms": 8.982701000059023,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "85724006-5538-4e8c-8640-86dc5e2a605c",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 60.04030430578592,
+      "average_latency_ms": 5.606940833179881,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "1303fbf5-8d0b-4a3f-8a10-53012c004efa",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.08898243683484,
+      "average_latency_ms": 8.065949208351716,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "b0d7e7ba-f29b-435f-8663-e4d1a19f0994",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.073128414141063,
+      "average_latency_ms": 12.993780625401996,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "3382d0f6-75e9-40b4-89da-f9d2ac900b88",
+      "scenario": "MONTH_END",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 60.03096622357796,
+      "average_latency_ms": 6.956650625306793,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "f78d038c-7ec3-4d42-ad0c-ddb0e84aa38d",
+      "scenario": "MONTH_END",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.017599974320465,
+      "average_latency_ms": 8.386786875053076,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "a86e8acf-f38a-4c86-ba02-ba513e74b392",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 59.988372003895265,
+      "average_latency_ms": 7.895946458575054,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "4b22ff2a-696b-416e-a51e-034665bfde27",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 522.8209549648449,
+      "average_latency_ms": 47.68686627076628,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "60725248-9164-4b49-b7cb-b500f29b709d",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.01746649062819,
+      "average_latency_ms": 10.692227499384899,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "e719c1d7-fb77-4702-990c-81ea913f925c",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 60.031524804888285,
+      "average_latency_ms": 6.180567499783744,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "69597ca1-fb2d-41b0-9909-e580daf25314",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.88447466773073,
+      "average_latency_ms": 6.16137191659315,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "749fd5b2-0df0-4f29-9ec1-aa3d2b8bbde6",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 474.3787259480453,
+      "average_latency_ms": 58.64755847913026,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "192126ec-bba9-4864-8439-298775913f00",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.07529137657262,
+      "average_latency_ms": 19.34786250021716,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "2c106452-3d91-41e9-9364-dc1b01b08a98",
+      "scenario": "SALARY_DAY",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.07577500899257,
+      "average_latency_ms": 15.390445625052962,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "7167f56d-d54f-4ac2-8881-a6a23359fcfd",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.096788646249575,
+      "average_latency_ms": 8.14189874990916,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "ca0b544a-e277-4056-89db-14b17b6c04ff",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 59.97231827716889,
+      "average_latency_ms": 9.761985832695549,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "2043c637-8682-4779-b5a0-c4429c396fe6",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.29211429128253,
+      "average_latency_ms": 6.805117958519986,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "37f89af3-f5d5-4956-9a8f-50039a6bc138",
+      "scenario": "MONTH_END",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.87588403336474,
+      "average_latency_ms": 5.024681749976783,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "9b2c80cc-e753-4405-bd3a-a5972abbad3b",
+      "scenario": "MONTH_END",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.40959422137587,
+      "average_latency_ms": 5.793907958225948,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "4c35e09c-e412-46f1-ac91-bb45a3ad80c8",
+      "scenario": "MONTH_END",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 60.00216382802886,
+      "average_latency_ms": 6.485114166935091,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "a800af46-06ce-48b3-ada0-66075f0c9b82",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 500.6427888358099,
+      "average_latency_ms": 53.02490381240508,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "c1886375-2a48-4c5c-bb0d-c29b38578c86",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.75653331607808,
+      "average_latency_ms": 7.39044675011731,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "fe18fb87-20a0-47a3-9a60-aa82ed240a1c",
+      "scenario": "SALARY_DAY",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.081942105541682,
+      "average_latency_ms": 12.121128750004573,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "01770a53-343f-468a-806c-2d6a2a9661e9",
+      "scenario": "SALARY_DAY",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.79882392448258,
+      "average_latency_ms": 6.909131750144297,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "06b5d460-72c0-4581-99c2-a323a1ae5772",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.3725712229073,
+      "average_latency_ms": 10.202120708284687,
+      "failed_operations": 133
+    },
+    {
+      "experiment_id": "3d412bda-4f1d-4fc7-8918-d0cf70ecd77e",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.42410638761396,
+      "average_latency_ms": 5.680848833459701,
+      "failed_operations": 164
+    },
+    {
+      "experiment_id": "ccda3040-5882-4ab8-a446-2e310ed3ff78",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.8302554306086,
+      "average_latency_ms": 4.541906916286583,
+      "failed_operations": 3
+    },
+    {
+      "experiment_id": "4fdfcfd0-5276-4675-a58a-df535c890f56",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.0079934434953,
+      "average_latency_ms": 14.848696250192006,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "1e190ba7-4123-4a18-b813-095ab87515a7",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 398.8555504738278,
+      "average_latency_ms": 73.3524623125201,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "3f767df2-db30-44da-8f41-3b4c34017e59",
+      "scenario": "MONTH_END",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.087564959887352,
+      "average_latency_ms": 9.632515624980442,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "f899bf86-a1fb-408d-98d9-026e3a2b10c1",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.81934970099192,
+      "average_latency_ms": 6.155065249962111,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "ea211857-6d5a-4983-9900-f082ba97bbe2",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 60.03117418873961,
+      "average_latency_ms": 7.407401666629691,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "9056e6a3-d5b6-448a-a473-ca5bee36749e",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.090708796784426,
+      "average_latency_ms": 11.670961249546963,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "681ee8ee-4a59-46cf-a2b2-3c8266aee242",
+      "scenario": "SALARY_DAY",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.1820549608503,
+      "average_latency_ms": 7.3372100833876175,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "dc8e7e33-d350-490d-aee0-0841dfdd5408",
+      "scenario": "SALARY_DAY",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 484.1332879463094,
+      "average_latency_ms": 56.974692020849034,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "8b736c0e-8966-4f37-8755-45f52229e6f2",
+      "scenario": "SALARY_DAY",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 60.009761337795254,
+      "average_latency_ms": 8.077628333467146,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "b33c5a4d-8c3a-47ec-9c09-b65142171c95",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.06404845551278,
+      "average_latency_ms": 16.644321874991874,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "fe5134ec-ef2e-4b8d-ac41-0823c36d1ea8",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 445.8710460123513,
+      "average_latency_ms": 78.77586839576907,
+      "failed_operations": 477
+    },
+    {
+      "experiment_id": "ed9a978a-7af9-4210-aaa9-deb7285298f4",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 454.9066443898066,
+      "average_latency_ms": 62.44980843742572,
+      "failed_operations": 4
+    },
+    {
+      "experiment_id": "b13cc8c1-0bd4-452a-94db-78b370128702",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 59.98121013623041,
+      "average_latency_ms": 7.541114374422857,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "7967361a-8901-46f0-8347-fa748aee3f7f",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 1.2,
+      "actual_tps": 20.032933391253337,
+      "average_latency_ms": 7.756822500323324,
+      "failed_operations": 4
+    },
+    {
+      "experiment_id": "20be6bf7-70ce-4276-97ab-7b1db8c624bd",
+      "scenario": "SALARY_DAY",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 454.6842064259195,
+      "average_latency_ms": 89.4598966873582,
+      "failed_operations": 1
+    },
+    {
+      "experiment_id": "0c9deb3b-9cf3-4361-ab62-ce19ce01b98b",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 59.99304455636102,
+      "average_latency_ms": 8.06770083348359,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "f566f04e-8737-465e-863e-6b7fd54b1cbd",
+      "scenario": "MONTH_END",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.91756782540384,
+      "average_latency_ms": 5.626202416509234,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "21b3ae97-7968-44a5-a58b-20a6840212be",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.7962490145715,
+      "average_latency_ms": 6.154081666863931,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "27c9ccf3-3e84-408d-bb37-190275ffdac0",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 407.7027068554889,
+      "average_latency_ms": 108.61963693753448,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "972b7d4a-1aa5-411f-a430-88a6b1467c6f",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.80545140555967,
+      "average_latency_ms": 6.2704913333800505,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "d5c72d33-4dad-4ade-a75d-9192cf5e903e",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 0.0,
+      "actual_tps": 59.987390650493914,
+      "average_latency_ms": 9.193719792165211,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "a404ac80-10d5-4d78-9754-d42ba4146884",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.4749418151781,
+      "average_latency_ms": 4.248605541912791,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "58cbf686-46cd-456b-9a60-3f38ad1b9e95",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 59.98725645717504,
+      "average_latency_ms": 8.350358749733763,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "1fa8590f-54ed-4738-bb5f-8b0351cdb999",
+      "scenario": "MONTH_END",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 516.7025387405323,
+      "average_latency_ms": 67.74950031255078,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "2c7e2e88-e074-4d5d-b7d4-0442fd534353",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.7657289584425,
+      "average_latency_ms": 7.202842083667444,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "1f228442-a7bb-44ba-bcf7-7fae528e58fb",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.082103924732362,
+      "average_latency_ms": 14.133849999689119,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "fcdcbe84-0d19-4450-9564-dc11f8998547",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.45233910339005,
+      "average_latency_ms": 7.894912124950982,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "a1514491-e888-45ae-b6ed-6567790111b6",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.8280722868972,
+      "average_latency_ms": 4.590321333416796,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "bdd4b197-3c1b-45f8-abfb-05aba9dbac09",
+      "scenario": "SALARY_DAY",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 0.0,
+      "actual_tps": 149.81253582882565,
+      "average_latency_ms": 6.9653761666025575,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "ccf51860-f6ce-453c-8a44-870f25e86b43",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.3829754301845,
+      "average_latency_ms": 6.049001916774917,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "6f81f052-d391-4225-ae72-f696a958ac86",
+      "scenario": "LOAN_PROCESSING",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 541.9201973513153,
+      "average_latency_ms": 53.52897204165553,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "87a992da-7664-4c27-ba10-eeed416321af",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 524.2376470605582,
+      "average_latency_ms": 74.73936510414812,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "299cc8dd-e854-4f36-aa4b-888f8daeff2d",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 4,
+      "target_tps": 20.0,
+      "account_skew": 0.0,
+      "actual_tps": 20.07372199863879,
+      "average_latency_ms": 14.453949999551696,
+      "failed_operations": 1
+    },
+    {
+      "experiment_id": "b70d53f7-eaf5-4a66-9082-a87a170a4a1e",
+      "scenario": "MONTH_END",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 1.2,
+      "actual_tps": 299.441025950658,
+      "average_latency_ms": 5.342167666585738,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "34cb2e56-8717-4a9d-891d-32581eefda79",
+      "scenario": "FESTIVAL_SPIKE",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 1.2,
+      "actual_tps": 494.912260717365,
+      "average_latency_ms": 79.15542524992816,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "dd0ce6dc-6834-4016-b66d-3844164d1b11",
+      "scenario": "CARD_PAYMENT_SPIKE",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.71080924389653,
+      "average_latency_ms": 6.718688749739765,
+      "failed_operations": 125
+    },
+    {
+      "experiment_id": "830fc4e8-5964-4654-9617-cfbb6574da78",
+      "scenario": "SALARY_DAY",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 60.001044768180094,
+      "average_latency_ms": 7.472400417100289,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "d6072cf8-9d6c-4dee-821b-2cd2e8c4010d",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.4610898225771,
+      "average_latency_ms": 5.738837874941964,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "9347a9b4-e24e-41c1-8780-b987cdc2701d",
+      "scenario": "SALARY_DAY",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.3694008100452,
+      "average_latency_ms": 6.200366458233475,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "caf8f648-1c20-4015-9be1-1743dfff45eb",
+      "scenario": "MONTH_END",
+      "concurrency": 48,
+      "target_tps": 600.0,
+      "account_skew": 0.0,
+      "actual_tps": 538.5922981410542,
+      "average_latency_ms": 48.154629895868005,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "8ed352fb-bce8-495b-90f9-e9ac1de51809",
+      "scenario": "NORMAL_DAY",
+      "concurrency": 8,
+      "target_tps": 60.0,
+      "account_skew": 1.2,
+      "actual_tps": 60.02723060282012,
+      "average_latency_ms": 7.43063437521414,
+      "failed_operations": 0
+    },
+    {
+      "experiment_id": "dcb01b84-8a60-4009-8c71-e7c237f37723",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 32,
+      "target_tps": 300.0,
+      "account_skew": 0.0,
+      "actual_tps": 299.14834336343387,
+      "average_latency_ms": 10.586026000091806,
+      "failed_operations": 2
+    },
+    {
+      "experiment_id": "e5ea51ed-8c91-4a1a-a7ee-f981b64f8f0a",
+      "scenario": "HIGH_CONCURRENCY_TRANSFER",
+      "concurrency": 16,
+      "target_tps": 150.0,
+      "account_skew": 1.2,
+      "actual_tps": 149.7776775044901,
+      "average_latency_ms": 7.586966249812879,
+      "failed_operations": 0
+    }
+  ]
+}

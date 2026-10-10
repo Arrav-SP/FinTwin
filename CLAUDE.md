@@ -27,7 +27,7 @@ A database-performance test bench, not a personal-finance or LLM app. There is n
 | `frontend/` | Old UI (plain HTML/JS). Retired in F4: no longer served by anything, files left on disk. Delete only if the user asks |
 | `web/` | New UI (F1, redesigned 2026-10-10). React 19 + TypeScript + Vite 8 + Tailwind 4 + TanStack Query + React Router 8 + Recharts. Read `web/DESIGN.md` before touching it. Tokens in `src/styles.css`; top-bar shell in `src/app/`; typed API in `src/api/`; pages Overview, Experiments, run detail (`/experiments/:id`, includes the advisor), Run, Predict, What if, Validation, Models (F2 and F3, 2026-10-10). There is no separate Advisor page and no two-workload comparison; the old UI's features are otherwise covered. Rule: measured = filled signal colour, predicted = hollow dashed. Serif Newsreader for statements, IBM Plex Sans for the interface. No cards, no sidebar, no icons |
 | `scripts/` | CLI entry points (seed, run_workload, train_models, what_if, validate_prediction, run_benchmark, ...) |
-| `tests/` | 15 modules, 87 cases; 12 need PostgreSQL (`test_phase1.py`, `test_m1_database.py`, `test_m2_database.py`) |
+| `tests/` | 16 modules, 93 cases; 13 need PostgreSQL (`test_phase1.py`, `test_m1_database.py`, `test_m2_database.py`, one case in `test_release.py`) |
 | `artifacts/` | git-ignored: 5 models (`.joblib` + `.json`), `validation.json`, `benchmark.csv`, sweep CSVs |
 | `docs/` | `RESULTS.md` (current results), `FRONTEND.md` (current UI). `PHASE*` and `UI_RESULTS.md` are marked historical |
 
@@ -113,6 +113,19 @@ Tests in `tests/test_f4.py` and `web/src/{lib/theme,app/AppShell,pages/Validatio
 - Report: `FinTwin_Final_Project_Review_Report_v2.docx` and `.pdf` (36 pages). Built from the 9 October report by a script that only reads the original; the script and figure scripts were temporary (session scratchpad) and are not in the repository. To rebuild, regenerate from the v2 file with python-docx (system Python 3.14 has python-docx, python-pptx, matplotlib, pymupdf; `.venv-ml` does not). The table of contents is a real Word field: update it through Word after edits.
 - `README.md` rewritten; `docs/RESULTS.md` and `docs/FRONTEND.md` are current; other docs carry a "historical record" note.
 - Advisor message typo fixed ("Un granted lock count").
+
+## Submission packaging (done 2026-10-11)
+
+Tests in `tests/test_release.py`. Backend suite: 93 passed.
+
+- `bundled/` (tracked, about 20 MB): `models/` (the M3 models), `campaign.json`, `campaign-random.json`, `m3-validation.json`, `study.json`, `report-facts.json`, `database.sql.gz` (plain `pg_dump --no-owner` of the whole database). If the models are retrained or new runs should ship, refresh this folder by hand.
+- `backend/app/bundled.py::install_bundled` copies bundled models into `artifacts/models` only when that folder has no `.joblib`, and bundled JSON files only when missing. Called when the API starts and by `scripts/serve.py`.
+- `trained_at` is now written into each model's JSON by `train_models` and read by the registry; file mtime is only a fallback. This matters because "current models" validation scoping compares against it, and a copy or checkout resets mtimes.
+- `GET /api/experiments` hides interrupted runs (elapsed > 3x requested) unless `include_interrupted=true`. The two sleep-corrupted runs (14403a51, 983c14b3) are still in the database: a `DELETE` was blocked by the permission classifier, so they were hidden instead. Do not retry the delete without the user asking.
+- Docker: `Dockerfile` (Node build stage, then Python 3.11), `scripts/serve.py` (wait for DB, schema, seed if empty, install bundled, uvicorn), `backend/constraints.txt` (pins numpy, scipy, scikit-learn, joblib, pandas to what the models were saved with). `docker compose up -d` still starts only PostgreSQL; `docker compose --profile app up -d --build` adds the app. Ports are bound to 127.0.0.1 and can be moved with `FINTWIN_DB_PORT` / `FINTWIN_APP_PORT`. On a new volume PostgreSQL restores `bundled/database.sql.gz` through `docker-entrypoint-initdb.d`.
+- Verified 2026-10-11 with a throwaway project (`-p fintwintest`, ports 55432/58000): fresh volume restored, 278 runs listed, 5 models, 16 current validations, a validation job ran. In the container host CPU read 2.2% against 16.7% predicted: the models are specific to the laptop outside Docker.
+- A backup from before this work: `..\FinTwin_backup_2026-10-10\db_dump_before_removing_interrupted_runs.dump` (custom format).
+- Stale after this change, not yet corrected: report v2 section 15.4 says only PostgreSQL is containerised, and section 16 lists containerising the application as future work.
 
 ## Documents
 

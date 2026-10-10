@@ -1,0 +1,8 @@
+# The exact versions the shipped models in bundled/models were trained and saved with.
+# A scikit-learn model file is only guaranteed to load with the version that wrote it.
+# Use: python -m pip install -r backend/requirements.txt -c backend/constraints.txt
+numpy==2.4.6
+scipy==1.17.1
+scikit-learn==1.9.1
+joblib==1.6.0
+pandas==2.3.3

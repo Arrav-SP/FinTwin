@@ -1,0 +1,774 @@
+{
+ "routes": [
+  "GET /api/database/summary",
+  "GET /api/experiments",
+  "GET /api/experiments/{experiment_id}",
+  "GET /api/experiments/{experiment_id}/latency",
+  "GET /api/health",
+  "GET /api/jobs",
+  "GET /api/jobs/{job_id}",
+  "GET /api/models",
+  "GET /api/recommendations/{experiment_id}",
+  "GET /api/scenarios",
+  "GET /api/system/status",
+  "GET /api/validation",
+  "GET /api/validation/summary",
+  "GET /api/validation/{validation_id}",
+  "POST /api/jobs",
+  "POST /api/predictions",
+  "POST /api/validation",
+  "POST /api/what-if",
+  "POST /api/what-if/sweep"
+ ],
+ "features": [
+  "scenario",
+  "concurrency",
+  "target_tps",
+  "duration_seconds",
+  "burstiness",
+  "account_skew",
+  "balance_check_ratio",
+  "recent_transactions_ratio",
+  "transfer_ratio",
+  "deposit_ratio",
+  "withdrawal_ratio",
+  "payment_ratio",
+  "loan_processing_ratio"
+ ],
+ "counts": {
+  "experiments": 280,
+  "completed": 280,
+  "failed": 0,
+  "events": 383385,
+  "failed_events": 2176,
+  "samples": 2633,
+  "validations": 26,
+  "validations_completed": 26,
+  "deadlocks": "0",
+  "db_bytes": 131628055
+ },
+ "failure_reasons": [
+  {
+   "reason": "Insufficient balance",
+   "n": 2176
+  }
+ ],
+ "summary_columns": [
+  "experiment_id",
+  "error_rate",
+  "p50_latency_ms",
+  "p95_latency_ms",
+  "p99_latency_ms",
+  "active_connections_max",
+  "blocked_sessions_max",
+  "lock_wait_count_max",
+  "db_xact_commit_delta",
+  "db_xact_rollback_delta",
+  "db_deadlocks_delta",
+  "db_cache_hit_ratio",
+  "host_cpu_avg_percent",
+  "host_memory_avg_percent",
+  "db_size_before_bytes",
+  "db_size_after_bytes",
+  "telemetry_sample_count",
+  "telemetry_error_count",
+  "generated_at",
+  "max_connections"
+ ],
+ "grid_levels": [
+  {
+   "concurrency": 4,
+   "target_tps": 20.0,
+   "runs": 28,
+   "tps": 20.07,
+   "latency": 12.26,
+   "p95": 38.45,
+   "cpu": 17.08,
+   "lock_runs": 0,
+   "lock_max": 0.0,
+   "saturated": 0
+  },
+  {
+   "concurrency": 8,
+   "target_tps": 60.0,
+   "runs": 28,
+   "tps": 60.0,
+   "latency": 7.61,
+   "p95": 11.9,
+   "cpu": 20.16,
+   "lock_runs": 0,
+   "lock_max": 0.0,
+   "saturated": 0
+  },
+  {
+   "concurrency": 16,
+   "target_tps": 150.0,
+   "runs": 28,
+   "tps": 149.82,
+   "latency": 6.25,
+   "p95": 10.05,
+   "cpu": 26.03,
+   "lock_runs": 1,
+   "lock_max": 1.0,
+   "saturated": 0
+  },
+  {
+   "concurrency": 32,
+   "target_tps": 300.0,
+   "runs": 28,
+   "tps": 299.28,
+   "latency": 6.92,
+   "p95": 12.41,
+   "cpu": 37.71,
+   "lock_runs": 4,
+   "lock_max": 2.0,
+   "saturated": 0
+  },
+  {
+   "concurrency": 48,
+   "target_tps": 600.0,
+   "runs": 28,
+   "tps": 488.28,
+   "latency": 67.03,
+   "p95": 187.96,
+   "cpu": 58.2,
+   "lock_runs": 21,
+   "lock_max": 43.0,
+   "saturated": 24
+  }
+ ],
+ "top_level_by_scenario": [
+  {
+   "scenario": "CARD_PAYMENT_SPIKE",
+   "account_skew": 0.0,
+   "tps": 460.9,
+   "latency": 61.7,
+   "p95": 97.2,
+   "locks": 0.5
+  },
+  {
+   "scenario": "CARD_PAYMENT_SPIKE",
+   "account_skew": 1.2,
+   "tps": 465.5,
+   "latency": 72.0,
+   "p95": 161.8,
+   "locks": 29.5
+  },
+  {
+   "scenario": "FESTIVAL_SPIKE",
+   "account_skew": 0.0,
+   "tps": 482.6,
+   "latency": 57.6,
+   "p95": 91.6,
+   "locks": 0.5
+  },
+  {
+   "scenario": "FESTIVAL_SPIKE",
+   "account_skew": 1.2,
+   "tps": 489.0,
+   "latency": 80.1,
+   "p95": 243.5,
+   "locks": 36.0
+  },
+  {
+   "scenario": "HIGH_CONCURRENCY_TRANSFER",
+   "account_skew": 0.0,
+   "tps": 407.1,
+   "latency": 71.9,
+   "p95": 117.6,
+   "locks": 1.5
+  },
+  {
+   "scenario": "HIGH_CONCURRENCY_TRANSFER",
+   "account_skew": 1.2,
+   "tps": 397.3,
+   "latency": 111.3,
+   "p95": 701.6,
+   "locks": 43.0
+  },
+  {
+   "scenario": "LOAN_PROCESSING",
+   "account_skew": 0.0,
+   "tps": 522.9,
+   "latency": 47.7,
+   "p95": 82.2,
+   "locks": 0.0
+  },
+  {
+   "scenario": "LOAN_PROCESSING",
+   "account_skew": 1.2,
+   "tps": 557.8,
+   "latency": 51.5,
+   "p95": 100.7,
+   "locks": 16.5
+  },
+  {
+   "scenario": "MONTH_END",
+   "account_skew": 0.0,
+   "tps": 510.6,
+   "latency": 50.7,
+   "p95": 89.2,
+   "locks": 0.5
+  },
+  {
+   "scenario": "MONTH_END",
+   "account_skew": 1.2,
+   "tps": 536.8,
+   "latency": 65.6,
+   "p95": 121.4,
+   "locks": 30.5
+  },
+  {
+   "scenario": "NORMAL_DAY",
+   "account_skew": 0.0,
+   "tps": 512.7,
+   "latency": 51.8,
+   "p95": 86.1,
+   "locks": 0.5
+  },
+  {
+   "scenario": "NORMAL_DAY",
+   "account_skew": 1.2,
+   "tps": 536.7,
+   "latency": 72.6,
+   "p95": 205.7,
+   "locks": 37.0
+  },
+  {
+   "scenario": "SALARY_DAY",
+   "account_skew": 0.0,
+   "tps": 485.3,
+   "latency": 56.9,
+   "p95": 89.1,
+   "locks": 0.5
+  },
+  {
+   "scenario": "SALARY_DAY",
+   "account_skew": 1.2,
+   "tps": 470.8,
+   "latency": 87.1,
+   "p95": 443.7,
+   "locks": 38.0
+  }
+ ],
+ "usable": {
+  "runs": 263,
+  "lock_runs": 35,
+  "saturated": 30,
+  "max_active": 48
+ },
+ "hot_id": "a6dc595b-6ac0-4bbb-875c-a95198d40733",
+ "hot_run": {
+  "scenario": "HIGH_CONCURRENCY_TRANSFER",
+  "configuration": "{\"seed\": 2026, \"burstiness\": 0.0, \"target_tps\": 600.0, \"concurrency\": 48, \"account_skew\": 1.2, \"operation_mix\": {\"PAYMENT\": 0.05, \"TRANSFER\": 0.7, \"BALANCE_CHECK\": 0.15, \"RECENT_TRANSACTIONS\": 0.1}, \"duration_seconds\": 8.0}",
+  "requested_operations": 4800.0,
+  "completed_operations": 4800.0,
+  "failed_operations": 0.0,
+  "actual_tps": 386.9197,
+  "average_latency_ms": 114.0439,
+  "p50_latency_ms": 11.5999,
+  "p95_latency_ms": 733.8493,
+  "p99_latency_ms": 1571.5112,
+  "experiment_id": "a6dc595b-6ac0-4bbb-875c-a95198d40733",
+  "error_rate": 0.0,
+  "active_connections_max": 48.0,
+  "blocked_sessions_max": 42.0,
+  "lock_wait_count_max": 43.0,
+  "db_xact_commit_delta": 18169.0,
+  "db_xact_rollback_delta": 1152.0,
+  "db_deadlocks_delta": 0.0,
+  "db_cache_hit_ratio": 99.9908,
+  "host_cpu_avg_percent": 53.6308,
+  "host_memory_avg_percent": 85.2429,
+  "db_size_before_bytes": 41368599.0,
+  "db_size_after_bytes": 42785815.0,
+  "telemetry_sample_count": 14.0,
+  "telemetry_error_count": 0.0,
+  "generated_at": "2026-10-09 22:52:07.062578+00:00",
+  "max_connections": 100.0
+ },
+ "hot_queue": {
+  "avg_wait": "2299.5434206666666667",
+  "p95_wait": 3940.2949500000004
+ },
+ "hot_assessment": {
+  "status": null,
+  "warnings": [
+   "Query-level analysis unavailable because pg_stat_statements is not enabled or accessible."
+  ],
+  "recommendations": [
+   {
+    "category": "MEMORY",
+    "severity": "HIGH",
+    "description": "Host memory averaged 85.24%.",
+    "evidence": {
+     "host_memory_avg_percent": "85.2429"
+    }
+   },
+   {
+    "category": "LOCKING",
+    "severity": "HIGH",
+    "description": "Un granted lock count reached 43.",
+    "evidence": {
+     "lock_wait_count_max": 43
+    }
+   },
+   {
+    "category": "LATENCY",
+    "severity": "MEDIUM",
+    "description": "P95 latency is 733.85 ms versus 114.04 ms average.",
+    "evidence": {
+     "average_latency_ms": "114.0439",
+     "p95_latency_ms": "733.8493",
+     "ratio": "6.434796600256567865532483544"
+    }
+   }
+  ]
+ },
+ "sweep": {
+  "parameter": "target_tps",
+  "values": [
+   50,
+   100,
+   150,
+   200,
+   300,
+   400,
+   500,
+   600
+  ],
+  "model_derived_sensitivity": {
+   "predicted_average_latency_ms": 0.1777595036363637,
+   "predicted_p95_latency_ms": 1.1307621061212119,
+   "predicted_actual_tps": 0.642846815295908,
+   "predicted_host_cpu_avg_percent": 0.07186586571909756,
+   "predicted_lock_wait_count_max": 0.07209935064935065
+  },
+  "results": [
+   {
+    "configuration": {
+     "scenario": "HIGH_CONCURRENCY_TRANSFER",
+     "concurrency": 32,
+     "target_tps": 50,
+     "duration_seconds": 8,
+     "account_skew": 1.2,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "TRANSFER": 0.7,
+      "BALANCE_CHECK": 0.15,
+      "RECENT_TRANSACTIONS": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 9.409892049999996,
+     "predicted_p95_latency_ms": 13.540286233333346,
+     "predicted_actual_tps": 50.02697908725079,
+     "predicted_host_cpu_avg_percent": 19.196767102197697,
+     "predicted_lock_wait_count_max": 0.26533333333333337
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "HIGH_CONCURRENCY_TRANSFER",
+     "concurrency": 32,
+     "target_tps": 100,
+     "duration_seconds": 8,
+     "account_skew": 1.2,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "TRANSFER": 0.7,
+      "BALANCE_CHECK": 0.15,
+      "RECENT_TRANSACTIONS": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 8.4175208,
+     "predicted_p95_latency_ms": 12.506625650000007,
+     "predicted_actual_tps": 99.93689304386983,
+     "predicted_host_cpu_avg_percent": 22.790060388152575,
+     "predicted_lock_wait_count_max": 0.26533333333333337
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "HIGH_CONCURRENCY_TRANSFER",
+     "concurrency": 32,
+     "target_tps": 150,
+     "duration_seconds": 8,
+     "account_skew": 1.2,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "TRANSFER": 0.7,
+      "BALANCE_CHECK": 0.15,
+      "RECENT_TRANSACTIONS": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 8.263342400000004,
+     "predicted_p95_latency_ms": 12.337069900000003,
+     "predicted_actual_tps": 149.821474644003,
+     "predicted_host_cpu_avg_percent": 26.38335367410745,
+     "predicted_lock_wait_count_max": 0.4626666666666667
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "HIGH_CONCURRENCY_TRANSFER",
+     "concurrency": 32,
+     "target_tps": 200,
+     "duration_seconds": 8,
+     "account_skew": 1.2,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "TRANSFER": 0.7,
+      "BALANCE_CHECK": 0.15,
+      "RECENT_TRANSACTIONS": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 8.25524826666667,
+     "predicted_p95_latency_ms": 12.395806233333335,
+     "predicted_actual_tps": 199.52943723992655,
+     "predicted_host_cpu_avg_percent": 29.97664696006233,
+     "predicted_lock_wait_count_max": 0.4501666666666667
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "HIGH_CONCURRENCY_TRANSFER",
+     "concurrency": 32,
+     "target_tps": 300,
+     "duration_seconds": 8,
+     "account_skew": 1.2,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "TRANSFER": 0.7,
+      "BALANCE_CHECK": 0.15,
+      "RECENT_TRANSACTIONS": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 8.763992550000001,
+     "predicted_p95_latency_ms": 16.34767310000001,
+     "predicted_actual_tps": 298.8056524143766,
+     "predicted_host_cpu_avg_percent": 37.16323353197208,
+     "predicted_lock_wait_count_max": 1.3453333333333333
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "HIGH_CONCURRENCY_TRANSFER",
+     "concurrency": 32,
+     "target_tps": 400,
+     "duration_seconds": 8,
+     "account_skew": 1.2,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "TRANSFER": 0.7,
+      "BALANCE_CHECK": 0.15,
+      "RECENT_TRANSACTIONS": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 46.90388464999995,
+     "predicted_p95_latency_ms": 363.5770411999997,
+     "predicted_actual_tps": 308.38412388564166,
+     "predicted_host_cpu_avg_percent": 44.34982010388184,
+     "predicted_lock_wait_count_max": 19.793666666666667
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "HIGH_CONCURRENCY_TRANSFER",
+     "concurrency": 32,
+     "target_tps": 500,
+     "duration_seconds": 8,
+     "account_skew": 1.2,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "TRANSFER": 0.7,
+      "BALANCE_CHECK": 0.15,
+      "RECENT_TRANSACTIONS": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 52.664071649999954,
+     "predicted_p95_latency_ms": 384.4972656999996,
+     "predicted_actual_tps": 382.61198859621516,
+     "predicted_host_cpu_avg_percent": 51.536406675791596,
+     "predicted_lock_wait_count_max": 21.177
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "HIGH_CONCURRENCY_TRANSFER",
+     "concurrency": 32,
+     "target_tps": 600,
+     "duration_seconds": 8,
+     "account_skew": 1.2,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "TRANSFER": 0.7,
+      "BALANCE_CHECK": 0.15,
+      "RECENT_TRANSACTIONS": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 107.17761905000003,
+     "predicted_p95_latency_ms": 635.4594445999999,
+     "predicted_actual_tps": 403.5927275000002,
+     "predicted_host_cpu_avg_percent": 58.72299324770135,
+     "predicted_lock_wait_count_max": 39.919976190476184
+    },
+    "warnings": []
+   }
+  ],
+  "warnings": []
+ },
+ "sweep_normal": {
+  "parameter": "target_tps",
+  "values": [
+   50,
+   100,
+   150,
+   200,
+   300,
+   400,
+   500,
+   600
+  ],
+  "model_derived_sensitivity": {
+   "predicted_average_latency_ms": 0.08078444225108229,
+   "predicted_p95_latency_ms": 0.1290283612813852,
+   "predicted_actual_tps": 0.843363369585273,
+   "predicted_host_cpu_avg_percent": 0.07186586571909759,
+   "predicted_lock_wait_count_max": 0.0010245021645021645
+  },
+  "results": [
+   {
+    "configuration": {
+     "scenario": "NORMAL_DAY",
+     "concurrency": 32,
+     "target_tps": 50,
+     "duration_seconds": 8,
+     "account_skew": 0,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "BALANCE_CHECK": 0.35,
+      "RECENT_TRANSACTIONS": 0.2,
+      "TRANSFER": 0.2,
+      "DEPOSIT": 0.1,
+      "WITHDRAWAL": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 8.172830200000002,
+     "predicted_p95_latency_ms": 14.034385433333343,
+     "predicted_actual_tps": 50.01842700429013,
+     "predicted_host_cpu_avg_percent": 22.624382137688386,
+     "predicted_lock_wait_count_max": 0.0
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "NORMAL_DAY",
+     "concurrency": 32,
+     "target_tps": 100,
+     "duration_seconds": 8,
+     "account_skew": 0,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "BALANCE_CHECK": 0.35,
+      "RECENT_TRANSACTIONS": 0.2,
+      "TRANSFER": 0.2,
+      "DEPOSIT": 0.1,
+      "WITHDRAWAL": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 6.190501266666667,
+     "predicted_p95_latency_ms": 11.029275633333334,
+     "predicted_actual_tps": 99.91355564132171,
+     "predicted_host_cpu_avg_percent": 26.217675423643264,
+     "predicted_lock_wait_count_max": 0.0
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "NORMAL_DAY",
+     "concurrency": 32,
+     "target_tps": 150,
+     "duration_seconds": 8,
+     "account_skew": 0,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "BALANCE_CHECK": 0.35,
+      "RECENT_TRANSACTIONS": 0.2,
+      "TRANSFER": 0.2,
+      "DEPOSIT": 0.1,
+      "WITHDRAWAL": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 6.003248633333333,
+     "predicted_p95_latency_ms": 10.910943033333327,
+     "predicted_actual_tps": 149.81477669511816,
+     "predicted_host_cpu_avg_percent": 29.810968709598143,
+     "predicted_lock_wait_count_max": 0.0
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "NORMAL_DAY",
+     "concurrency": 32,
+     "target_tps": 200,
+     "duration_seconds": 8,
+     "account_skew": 0,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "BALANCE_CHECK": 0.35,
+      "RECENT_TRANSACTIONS": 0.2,
+      "TRANSFER": 0.2,
+      "DEPOSIT": 0.1,
+      "WITHDRAWAL": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 5.967835633333332,
+     "predicted_p95_latency_ms": 10.740206966666662,
+     "predicted_actual_tps": 199.59986922172192,
+     "predicted_host_cpu_avg_percent": 33.40426199555302,
+     "predicted_lock_wait_count_max": 0.0
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "NORMAL_DAY",
+     "concurrency": 32,
+     "target_tps": 300,
+     "duration_seconds": 8,
+     "account_skew": 0,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "BALANCE_CHECK": 0.35,
+      "RECENT_TRANSACTIONS": 0.2,
+      "TRANSFER": 0.2,
+      "DEPOSIT": 0.1,
+      "WITHDRAWAL": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 6.00297225,
+     "predicted_p95_latency_ms": 11.081510533333336,
+     "predicted_actual_tps": 299.3870514514984,
+     "predicted_host_cpu_avg_percent": 40.59084856746277,
+     "predicted_lock_wait_count_max": 0.01
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "NORMAL_DAY",
+     "concurrency": 32,
+     "target_tps": 400,
+     "duration_seconds": 8,
+     "account_skew": 0,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "BALANCE_CHECK": 0.35,
+      "RECENT_TRANSACTIONS": 0.2,
+      "TRANSFER": 0.2,
+      "DEPOSIT": 0.1,
+      "WITHDRAWAL": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 15.858670254761899,
+     "predicted_p95_latency_ms": 38.36583133333331,
+     "predicted_actual_tps": 355.41573505029766,
+     "predicted_host_cpu_avg_percent": 47.77743513937253,
+     "predicted_lock_wait_count_max": 1.3378095238095238
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "NORMAL_DAY",
+     "concurrency": 32,
+     "target_tps": 500,
+     "duration_seconds": 8,
+     "account_skew": 0,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "BALANCE_CHECK": 0.35,
+      "RECENT_TRANSACTIONS": 0.2,
+      "TRANSFER": 0.2,
+      "DEPOSIT": 0.1,
+      "WITHDRAWAL": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 19.069616754761903,
+     "predicted_p95_latency_ms": 34.85304373333331,
+     "predicted_actual_tps": 441.0775844726096,
+     "predicted_host_cpu_avg_percent": 54.9640217112823,
+     "predicted_lock_wait_count_max": 1.3678095238095238
+    },
+    "warnings": []
+   },
+   {
+    "configuration": {
+     "scenario": "NORMAL_DAY",
+     "concurrency": 32,
+     "target_tps": 600,
+     "duration_seconds": 8,
+     "account_skew": 0,
+     "burstiness": 0.0,
+     "operation_mix": {
+      "BALANCE_CHECK": 0.35,
+      "RECENT_TRANSACTIONS": 0.2,
+      "TRANSFER": 0.2,
+      "DEPOSIT": 0.1,
+      "WITHDRAWAL": 0.1,
+      "PAYMENT": 0.05
+     }
+    },
+    "predictions": {
+     "predicted_average_latency_ms": 52.60427343809526,
+     "predicted_p95_latency_ms": 84.9999841380952,
+     "predicted_actual_tps": 513.8682802761903,
+     "predicted_host_cpu_avg_percent": 62.15060828319206,
+     "predicted_lock_wait_count_max": 0.5634761904761905
+    },
+    "warnings": []
+   }
+  ],
+  "warnings": []
+ }
+}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from sqlalchemy import text
 
@@ -96,6 +97,7 @@ def train_models(output_dir: Path = Path("artifacts/models")) -> dict:
     features = make_preprocessor()
     output_dir.mkdir(parents=True, exist_ok=True)
     results = {}
+    trained_at = datetime.now(timezone.utc).isoformat()
     for target in TARGETS:
         evaluation = cross_validate(usable, target, folds)
         name = min(evaluation["candidates"], key=lambda candidate: evaluation["candidates"][candidate]["mae"])
@@ -106,6 +108,7 @@ def train_models(output_dir: Path = Path("artifacts/models")) -> dict:
         metadata = {
             "target": target,
             "algorithm": name,
+            "trained_at": trained_at,
             "training_samples": len(usable),
             "test_samples": len(usable),
             "configurations": configurations,

@@ -17,6 +17,7 @@ def describe_models(model_dir: Path = Path("artifacts/models")) -> list[dict]:
         if not metadata_path.exists() or not artifact.exists():
             continue
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-        metadata["trained_at"] = datetime.fromtimestamp(artifact.stat().st_mtime, timezone.utc).isoformat()
+        # Recorded at training. The file time is only a fallback: it changes when a model is copied or checked out.
+        metadata.setdefault("trained_at", datetime.fromtimestamp(artifact.stat().st_mtime, timezone.utc).isoformat())
         models.append(metadata)
     return models

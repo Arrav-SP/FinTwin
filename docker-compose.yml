@@ -1,20 +1,40 @@
+# `docker compose up -d` starts only the database, as before.
+# `docker compose --profile app up -d --build` also builds and starts FinTwin itself.
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: fintwin-postgres
+    container_name: ${COMPOSE_PROJECT_NAME:-fintwin}-postgres
     restart: unless-stopped
     env_file:
       - .env
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${FINTWIN_DB_PORT:-5432}:5432"
     volumes:
       - fintwin-postgres-data:/var/lib/postgresql/data
+      # Loaded by PostgreSQL only when the data volume is new: the recorded runs behind the report.
+      - ./bundled/database.sql.gz:/docker-entrypoint-initdb.d/10-fintwin.sql.gz:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
+  app:
+    profiles: ["app"]
+    build: .
+    container_name: ${COMPOSE_PROJECT_NAME:-fintwin}-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    ports:
+      # Local use only: the API has no authentication.
+      - "127.0.0.1:${FINTWIN_APP_PORT:-8000}:8000"
+    volumes:
+      - fintwin-artifacts:/app/artifacts
+
 volumes:
   fintwin-postgres-data:
-
+  fintwin-artifacts:

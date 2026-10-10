@@ -1,0 +1,112 @@
+{
+  "target": "host_cpu_avg_percent",
+  "algorithm": "linear_regression",
+  "trained_at": "2026-10-10T08:03:47.098951+00:00",
+  "training_samples": 247,
+  "test_samples": 247,
+  "configurations": 176,
+  "cv_folds": 5,
+  "held_out": "load settings",
+  "feature_columns": [
+    "scenario",
+    "concurrency",
+    "target_tps",
+    "duration_seconds",
+    "burstiness",
+    "account_skew",
+    "balance_check_ratio",
+    "recent_transactions_ratio",
+    "transfer_ratio",
+    "deposit_ratio",
+    "withdrawal_ratio",
+    "payment_ratio",
+    "loan_processing_ratio"
+  ],
+  "metrics": {
+    "mae": 5.802341134176069,
+    "rmse": 8.893548436105725,
+    "r2": 0.6749665524795687
+  },
+  "candidates": {
+    "linear_regression": {
+      "mae": 5.802341134176069,
+      "rmse": 8.893548436105725,
+      "r2": 0.6749665524795687
+    },
+    "random_forest": {
+      "mae": 6.478141230513784,
+      "rmse": 9.490870928888224,
+      "r2": 0.6298395286928873
+    },
+    "gradient_boosting": {
+      "mae": 6.944353554320342,
+      "rmse": 10.51856057947796,
+      "r2": 0.5453360402104739
+    }
+  },
+  "baseline": {
+    "mae": 13.481186142465447,
+    "rmse": 16.72795039561111,
+    "r2": -0.14990872416215373
+  },
+  "repeat_spread": 2.349211895810672,
+  "scenario_values": [
+    "CARD_PAYMENT_SPIKE",
+    "FESTIVAL_SPIKE",
+    "HIGH_CONCURRENCY_TRANSFER",
+    "LOAN_PROCESSING",
+    "MONTH_END",
+    "NORMAL_DAY",
+    "SALARY_DAY"
+  ],
+  "numeric_ranges": {
+    "concurrency": [
+      2.0,
+      62.0
+    ],
+    "target_tps": [
+      10.0,
+      600.0
+    ],
+    "duration_seconds": [
+      3.0,
+      10.0
+    ],
+    "burstiness": [
+      0.0,
+      0.0
+    ],
+    "account_skew": [
+      0.0,
+      1.5
+    ],
+    "balance_check_ratio": [
+      0.15,
+      0.35
+    ],
+    "recent_transactions_ratio": [
+      0.05,
+      0.2
+    ],
+    "transfer_ratio": [
+      0.05,
+      0.7
+    ],
+    "deposit_ratio": [
+      0.0,
+      0.35
+    ],
+    "withdrawal_ratio": [
+      0.0,
+      0.1
+    ],
+    "payment_ratio": [
+      0.0,
+      0.6
+    ],
+    "loan_processing_ratio": [
+      0.0,
+      0.55
+    ]
+  }
+}

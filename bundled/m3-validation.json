@@ -1,0 +1,498 @@
+[
+  {
+    "scenario": "NORMAL_DAY",
+    "concurrency": 12,
+    "target_tps": 100.0,
+    "account_skew": 0.0,
+    "average_latency_ms": {
+      "predicted": 6.285685833333337,
+      "actual": 6.3993,
+      "baseline": 16.39474871794872
+    },
+    "p95_latency_ms": {
+      "predicted": 10.42984820238096,
+      "actual": 10.7144,
+      "baseline": 44.173315384615385
+    },
+    "actual_tps": {
+      "predicted": 99.9139226849639,
+      "actual": 99.9603,
+      "baseline": 100.0
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 26.6692134331479,
+      "actual": 29.475,
+      "baseline": 30.772176923076923
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.0,
+      "actual": 0.0,
+      "baseline": 2.9743589743589745
+    }
+  },
+  {
+    "scenario": "SALARY_DAY",
+    "concurrency": 24,
+    "target_tps": 220.0,
+    "account_skew": 0.6,
+    "average_latency_ms": {
+      "predicted": 7.127952414285711,
+      "actual": 7.5158,
+      "baseline": 16.142777777777777
+    },
+    "p95_latency_ms": {
+      "predicted": 11.919809916666669,
+      "actual": 10.6031,
+      "baseline": 45.536052777777776
+    },
+    "actual_tps": {
+      "predicted": 219.58358883628995,
+      "actual": 219.4741,
+      "baseline": 220.0
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 31.888238895568815,
+      "actual": 34.475,
+      "baseline": 27.416675
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.07,
+      "actual": 0.0,
+      "baseline": 2.1944444444444446
+    }
+  },
+  {
+    "scenario": "MONTH_END",
+    "concurrency": 40,
+    "target_tps": 450.0,
+    "account_skew": 0.0,
+    "average_latency_ms": {
+      "predicted": 11.612792000000006,
+      "actual": 5.1174,
+      "baseline": 13.148682352941178
+    },
+    "p95_latency_ms": {
+      "predicted": 21.855410499999994,
+      "actual": 9.86,
+      "baseline": 27.744911764705883
+    },
+    "actual_tps": {
+      "predicted": 439.78006197468915,
+      "actual": 448.8557,
+      "baseline": 450.0
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 49.45547688250406,
+      "actual": 43.0875,
+      "baseline": 32.85126470588235
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.25,
+      "actual": 0.0,
+      "baseline": 1.911764705882353
+    }
+  },
+  {
+    "scenario": "HIGH_CONCURRENCY_TRANSFER",
+    "concurrency": 20,
+    "target_tps": 220.0,
+    "account_skew": 1.2,
+    "average_latency_ms": {
+      "predicted": 7.8931029666666666,
+      "actual": 9.0699,
+      "baseline": 22.810602857142857
+    },
+    "p95_latency_ms": {
+      "predicted": 11.689563750000007,
+      "actual": 13.0221,
+      "baseline": 80.93039142857144
+    },
+    "actual_tps": {
+      "predicted": 219.5811631146514,
+      "actual": 219.6882,
+      "baseline": 220.0
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 31.684887080147067,
+      "actual": 32.575,
+      "baseline": 29.54107714285714
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.7671666666666664,
+      "actual": 1.0,
+      "baseline": 4.057142857142857
+    }
+  },
+  {
+    "scenario": "NORMAL_DAY",
+    "concurrency": 36,
+    "target_tps": 106.1,
+    "account_skew": 0.6,
+    "average_latency_ms": {
+      "predicted": 6.318880100000001,
+      "actual": 5.9103,
+      "baseline": 16.39474871794872
+    },
+    "p95_latency_ms": {
+      "predicted": 10.96659425,
+      "actual": 9.6683,
+      "baseline": 44.173315384615385
+    },
+    "actual_tps": {
+      "predicted": 106.02090626248197,
+      "actual": 105.9949,
+      "baseline": 106.1
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 26.626546429308757,
+      "actual": 19.15,
+      "baseline": 30.772176923076923
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.0,
+      "actual": 0.0,
+      "baseline": 2.9743589743589745
+    }
+  },
+  {
+    "scenario": "CARD_PAYMENT_SPIKE",
+    "concurrency": 32,
+    "target_tps": 41.6,
+    "account_skew": 0.0,
+    "average_latency_ms": {
+      "predicted": 9.201718666666668,
+      "actual": 8.8165,
+      "baseline": 15.915348571428572
+    },
+    "p95_latency_ms": {
+      "predicted": 13.524716333333338,
+      "actual": 12.6004,
+      "baseline": 29.447894285714288
+    },
+    "actual_tps": {
+      "predicted": 41.623836999161625,
+      "actual": 41.6431,
+      "baseline": 41.6
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 21.274644272409343,
+      "actual": 20.6625,
+      "baseline": 30.210214285714287
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.0,
+      "actual": 0.0,
+      "baseline": 1.7142857142857142
+    }
+  },
+  {
+    "scenario": "MONTH_END",
+    "concurrency": 27,
+    "target_tps": 437.2,
+    "account_skew": 1.2,
+    "average_latency_ms": {
+      "predicted": 24.428427452380966,
+      "actual": 11.6012,
+      "baseline": 13.148682352941178
+    },
+    "p95_latency_ms": {
+      "predicted": 109.75191633333334,
+      "actual": 41.4891,
+      "baseline": 27.744911764705883
+    },
+    "actual_tps": {
+      "predicted": 427.6717857642869,
+      "actual": 435.9849,
+      "baseline": 437.2
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 48.950687160837475,
+      "actual": 46.4875,
+      "baseline": 32.85126470588235
+    },
+    "lock_wait_count_max": {
+      "predicted": 10.4485,
+      "actual": 1.0,
+      "baseline": 1.911764705882353
+    }
+  },
+  {
+    "scenario": "NORMAL_DAY",
+    "concurrency": 4,
+    "target_tps": 62.0,
+    "account_skew": 0.6,
+    "average_latency_ms": {
+      "predicted": 6.897600966666672,
+      "actual": 6.624,
+      "baseline": 16.39474871794872
+    },
+    "p95_latency_ms": {
+      "predicted": 11.382038333333332,
+      "actual": 10.1785,
+      "baseline": 44.173315384615385
+    },
+    "actual_tps": {
+      "predicted": 61.99146777584051,
+      "actual": 62.0163,
+      "baseline": 62.0
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 24.179722566303973,
+      "actual": 17.15,
+      "baseline": 30.772176923076923
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.0,
+      "actual": 0.0,
+      "baseline": 2.9743589743589745
+    }
+  },
+  {
+    "scenario": "FESTIVAL_SPIKE",
+    "concurrency": 17,
+    "target_tps": 49.3,
+    "account_skew": 0.6,
+    "average_latency_ms": {
+      "predicted": 8.179556166666671,
+      "actual": 8.2769,
+      "baseline": 18.01256470588235
+    },
+    "p95_latency_ms": {
+      "predicted": 12.091825416666667,
+      "actual": 12.3326,
+      "baseline": 39.284373529411766
+    },
+    "actual_tps": {
+      "predicted": 49.33478656693775,
+      "actual": 49.2873,
+      "baseline": 49.3
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 20.71895286832809,
+      "actual": 18.6375,
+      "baseline": 30.92073235294118
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.0,
+      "actual": 0.0,
+      "baseline": 2.1470588235294117
+    }
+  },
+  {
+    "scenario": "LOAN_PROCESSING",
+    "concurrency": 22,
+    "target_tps": 379.6,
+    "account_skew": 0.0,
+    "average_latency_ms": {
+      "predicted": 8.23864630000001,
+      "actual": 4.2476,
+      "baseline": 11.65154705882353
+    },
+    "p95_latency_ms": {
+      "predicted": 23.542029,
+      "actual": 8.3815,
+      "baseline": 24.72184411764706
+    },
+    "actual_tps": {
+      "predicted": 350.02175939407,
+      "actual": 378.8397,
+      "baseline": 379.6
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 45.39701316107549,
+      "actual": 38.4875,
+      "baseline": 31.12749411764706
+    },
+    "lock_wait_count_max": {
+      "predicted": 1.7733333333333332,
+      "actual": 0.0,
+      "baseline": 1.0
+    }
+  },
+  {
+    "scenario": "HIGH_CONCURRENCY_TRANSFER",
+    "concurrency": 39,
+    "target_tps": 581.4,
+    "account_skew": 0.0,
+    "average_latency_ms": {
+      "predicted": 72.93377623333335,
+      "actual": 54.9042,
+      "baseline": 22.810602857142857
+    },
+    "p95_latency_ms": {
+      "predicted": 171.9367114166666,
+      "actual": 83.0032,
+      "baseline": 80.93039142857144
+    },
+    "actual_tps": {
+      "predicted": 397.1912966335931,
+      "actual": 431.7262,
+      "baseline": 581.4
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 57.10665618863966,
+      "actual": 61.37,
+      "baseline": 29.54107714285714
+    },
+    "lock_wait_count_max": {
+      "predicted": 3.8958333333333344,
+      "actual": 1.0,
+      "baseline": 4.057142857142857
+    }
+  },
+  {
+    "scenario": "CARD_PAYMENT_SPIKE",
+    "concurrency": 42,
+    "target_tps": 16.4,
+    "account_skew": 0.0,
+    "average_latency_ms": {
+      "predicted": 11.37602466666667,
+      "actual": 17.8813,
+      "baseline": 15.915348571428572
+    },
+    "p95_latency_ms": {
+      "predicted": 22.33966566666665,
+      "actual": 39.3506,
+      "baseline": 29.447894285714288
+    },
+    "actual_tps": {
+      "predicted": 16.502850242774816,
+      "actual": 16.4219,
+      "baseline": 16.4
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 19.237855451535765,
+      "actual": 17.775,
+      "baseline": 30.210214285714287
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.0,
+      "actual": 0.0,
+      "baseline": 1.7142857142857142
+    }
+  },
+  {
+    "scenario": "FESTIVAL_SPIKE",
+    "concurrency": 34,
+    "target_tps": 289.7,
+    "account_skew": 1.2,
+    "average_latency_ms": {
+      "predicted": 6.18160294523809,
+      "actual": 6.1038,
+      "baseline": 18.01256470588235
+    },
+    "p95_latency_ms": {
+      "predicted": 10.234910280952372,
+      "actual": 10.0798,
+      "baseline": 39.284373529411766
+    },
+    "actual_tps": {
+      "predicted": 288.96003823567213,
+      "actual": 289.1965,
+      "baseline": 289.7
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 37.672496505800126,
+      "actual": 31.45,
+      "baseline": 30.92073235294118
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.0,
+      "actual": 0.0,
+      "baseline": 2.1470588235294117
+    }
+  },
+  {
+    "scenario": "SALARY_DAY",
+    "concurrency": 15,
+    "target_tps": 300.8,
+    "account_skew": 1.2,
+    "average_latency_ms": {
+      "predicted": 7.148775433333334,
+      "actual": 6.2315,
+      "baseline": 16.142777777777777
+    },
+    "p95_latency_ms": {
+      "predicted": 12.112341776190478,
+      "actual": 10.2112,
+      "baseline": 45.536052777777776
+    },
+    "actual_tps": {
+      "predicted": 300.02502608306236,
+      "actual": 299.9734,
+      "baseline": 300.8
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 37.95898977662891,
+      "actual": 33.15,
+      "baseline": 27.416675
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.8178095238095238,
+      "actual": 0.0,
+      "baseline": 2.1944444444444446
+    }
+  },
+  {
+    "scenario": "SALARY_DAY",
+    "concurrency": 15,
+    "target_tps": 15.5,
+    "account_skew": 1.2,
+    "average_latency_ms": {
+      "predicted": 13.915398833333327,
+      "actual": 20.5279,
+      "baseline": 16.142777777777777
+    },
+    "p95_latency_ms": {
+      "predicted": 33.47969533333338,
+      "actual": 47.2967,
+      "baseline": 45.536052777777776
+    },
+    "actual_tps": {
+      "predicted": 15.561922757850292,
+      "actual": 15.5918,
+      "baseline": 15.5
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 17.455658286970372,
+      "actual": 13.375,
+      "baseline": 27.416675
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.0,
+      "actual": 0.0,
+      "baseline": 2.1944444444444446
+    }
+  },
+  {
+    "scenario": "MONTH_END",
+    "concurrency": 41,
+    "target_tps": 35.9,
+    "account_skew": 0.0,
+    "average_latency_ms": {
+      "predicted": 6.8980199999999945,
+      "actual": 7.2691,
+      "baseline": 13.148682352941178
+    },
+    "p95_latency_ms": {
+      "predicted": 12.072929999999992,
+      "actual": 12.1315,
+      "baseline": 27.744911764705883
+    },
+    "actual_tps": {
+      "predicted": 35.94691289405728,
+      "actual": 35.9441,
+      "baseline": 35.9
+    },
+    "host_cpu_avg_percent": {
+      "predicted": 19.673244987750525,
+      "actual": 19.6875,
+      "baseline": 32.85126470588235
+    },
+    "lock_wait_count_max": {
+      "predicted": 0.0,
+      "actual": 0.0,
+      "baseline": 1.911764705882353
+    }
+  }
+]

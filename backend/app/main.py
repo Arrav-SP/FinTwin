@@ -10,8 +10,10 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from .bundled import install_bundled
 from .database import check_connection, engine
 from .jobs import JobManager
+from .ml.dataset import INTERRUPTED_FACTOR
 from .telemetry import TelemetryCollector
 from .telemetry.metrics import latency_breakdown, summary_select
 from .ui import mount_ui
@@ -27,6 +29,8 @@ APP_ROOT = Path(__file__).resolve().parents[2]
 WEB_ROOT = APP_ROOT / "web" / "dist"
 
 app = FastAPI(title="FinTwin API", version="8.0.0")
+# A fresh copy of the project has no trained models; install the ones shipped with it.
+install_bundled()
 jobs = JobManager()
 
 
@@ -122,7 +126,9 @@ def system_status() -> dict[str, Any]:
 
 
 @app.get("/api/experiments")
-def experiments(limit: int = 100) -> list[dict[str, Any]]:
+def experiments(limit: int = 100, include_interrupted: bool = False) -> list[dict[str, Any]]:
+    """Recent runs. A run that lasted several times its requested duration was suspended with the
+    machine; its figures measure the pause, so it is listed only on request."""
     try:
         with engine.connect() as connection:
             rows = connection.execute(text("""
@@ -132,8 +138,10 @@ def experiments(limit: int = 100) -> list[dict[str, Any]]:
                        s.telemetry_sample_count
                 FROM experiment_runs e
                 LEFT JOIN experiment_summaries s USING (experiment_id)
+                WHERE :include_interrupted OR NOT COALESCE(
+                    EXTRACT(EPOCH FROM e.completed_at - e.started_at) > :factor * (e.configuration->>'duration_seconds')::float, FALSE)
                 ORDER BY e.started_at DESC LIMIT :limit
-            """), {"limit": max(1, min(limit, 500))}).mappings().all()
+            """), {"limit": max(1, min(limit, 500)), "include_interrupted": include_interrupted, "factor": INTERRUPTED_FACTOR}).mappings().all()
         result = []
         for row in rows:
             record = dict(row)

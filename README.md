@@ -24,20 +24,40 @@ Measured on one development machine with runs of eight seconds. Details and limi
 
 PostgreSQL 16 in Docker; Python 3.11+ with FastAPI, SQLAlchemy 2 Core, psycopg 3, pandas and scikit-learn; a React, TypeScript and Vite interface in `web/`; pytest and Vitest for tests.
 
-## Setup (Windows PowerShell, from the project root)
+## Quick start with Docker
+
+This needs only Docker. It builds the interface and the API, starts PostgreSQL, and on a new database loads the recorded runs and the trained models that the report is based on.
+
+```powershell
+Copy-Item .env.example .env
+docker compose --profile app up -d --build
+```
+
+Open `http://127.0.0.1:8000/` once the build finishes (a few minutes the first time). Stop it with `docker compose --profile app down`.
+
+What you get is the author's data and models. Every page works at once, and you can run new workloads and validations. Two things to know:
+
+- The models were trained on the author's laptop. On another machine, and inside a container, the measured latency and especially host CPU will differ from the predictions. To get models for your own machine, run the two campaigns and `train_models.py` (see below).
+- The server listens on `127.0.0.1` only. The API has no authentication and is not meant to be exposed.
+
+## Setup without Docker for the application (Windows PowerShell, from the project root)
+
+Use this for development. PostgreSQL still runs in Docker; `docker compose up -d` starts only the database.
 
 ```powershell
 Copy-Item .env.example .env
 docker compose up -d
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r backend/requirements.txt
+python -m pip install -r backend/requirements.txt -c backend/constraints.txt
 $env:PYTHONPATH = (Get-Location).Path
 python scripts/initialize_database.py
 python scripts/seed_database.py
 ```
 
-The seed is deterministic (`seed = 42`): 100 branches, 1,000 customers, 1,500 accounts, 100 merchants, 5,000 transactions and 200 loans. `seed_database.py` truncates and reloads those six tables.
+`backend/constraints.txt` pins the library versions the shipped models were saved with; a scikit-learn model file is only guaranteed to load with the version that wrote it.
+
+On a new database volume PostgreSQL loads `bundled/database.sql.gz` (the recorded runs), so the two `scripts/` lines above are only needed if you removed that file or want to reset the banking tables. The seed is deterministic (`seed = 42`): 100 branches, 1,000 customers, 1,500 accounts, 100 merchants, 5,000 transactions and 200 loans. `seed_database.py` truncates and reloads those six tables.
 
 Build the interface once (and again after changing anything in `web/`), then start the server:
 
@@ -48,6 +68,8 @@ python -m uvicorn backend.app.main:app
 ```
 
 Open `http://127.0.0.1:8000/`. The same server answers the API under `/api`. The API has no authentication and is meant for local use only.
+
+If `artifacts/models` is empty, the server installs the shipped models from `bundled/models` when it starts. Models you train yourself are never replaced.
 
 ## Using it
 
@@ -75,7 +97,7 @@ python -m pytest
 npm --prefix web test
 ```
 
-The backend suite has 87 cases; twelve need PostgreSQL running and seeded, and `tests/test_phase1.py` changes account balances. The interface has 73 tests.
+The backend suite has 93 cases; thirteen need PostgreSQL running and seeded, and `tests/test_phase1.py` changes account balances. The interface has 73 tests.
 
 ## Layout
 
@@ -87,6 +109,8 @@ The backend suite has 87 cases; twelve need PostgreSQL running and seeded, and `
 | `scripts/` | Command-line entry points |
 | `tests/` | Backend tests |
 | `docs/` | Results and design notes. Files named `PHASE*` are historical |
-| `artifacts/` | Models, campaign records and study output (not in version control) |
+| `bundled/` | Shipped with the project: the trained models, the campaign, validation and study records, and a dump of the database |
+| `artifacts/` | Working copy of models and results on this machine (not in version control) |
+| `Dockerfile`, `docker-compose.yml` | The database service, and the application service under the `app` profile |
 
 `frontend/` holds the first, plain HTML interface. It is no longer served.
