@@ -16,7 +16,7 @@ export function PageIntro({ title, children }: { title: string; children?: React
  */
 export function Section({ title, note, aside, children, className = "" }: { title: string; note?: ReactNode; aside?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={`border-t border-rule pt-5 ${className}`}>
+    <section className={`min-w-0 border-t border-rule pt-5 ${className}`}>
       <header className="mb-5 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="max-w-[60ch]">
           <h2 className="serif text-lg leading-tight">{title}</h2>

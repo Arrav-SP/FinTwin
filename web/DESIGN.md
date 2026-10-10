@@ -102,3 +102,20 @@ The serif is the editorial voice and appears only where the interface is saying 
 ## Not allowed
 
 Fake or sample data outside test files; zero in place of a missing value; icons without a job; badges for states that are always the same; a control that leads nowhere.
+
+## Themes (F4)
+
+Dark is the default and the reference. The light theme is the same design on warm paper, meant for projectors, bright rooms and screenshots in a printed report.
+
+- A theme changes token values only. `html[data-theme="light"]` in `src/styles.css` redefines the eleven colour tokens; no component reads the theme or carries a theme-specific class.
+- Token names keep their dark-theme meaning in both themes: `ink` is the page, `paper` is the text. Do not rename them or add `dark:` variants.
+- Never write a colour literal in a component or a chart. Use the tokens (`var(--color-...)` in SVG) so both themes stay correct.
+- Light-theme text keeps the same contrast floor: paper and graphite at least 7:1 on the page, pencil at least 4.5:1. The signal colour is darkened (`#0b7a67`) so a filled mark still reads on paper.
+- The choice lives in the footer as a two-option `Segmented`, is stored in `localStorage` (`fintwin-theme`), and is applied before first render in `src/main.tsx`.
+
+## Layout safeguards (F4)
+
+- A page-level grid that can hold a table must be `grid-cols-[minmax(0,1fr)]`, and `Section` is `min-w-0`. Otherwise a table's minimum width stretches the whole page on a phone instead of scrolling inside its own wrapper.
+- Below `lg` the header sections scroll sideways with a fading right edge; the second and third status items appear only from `xl`.
+- Every page is loaded on demand (`src/app/router.tsx`), unknown addresses get `NotFound`, and a page that throws gets `PageFailed`.
+

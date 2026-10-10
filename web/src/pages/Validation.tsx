@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { useValidationSummary, useValidations } from "../api/queries";
+import { useValidationSummary, useValidations, type ValidationScope } from "../api/queries";
 import { TARGETS, type Target, type Validation as ValidationRecord, type ValidationSummary } from "../api/types";
 import { AccuracyChart } from "../components/AccuracyChart";
 import { TARGET_LABELS } from "../components/evidence";
@@ -14,6 +14,20 @@ import { validationPoints } from "../lib/jobs";
 const LINK = "text-paper underline decoration-rule-strong underline-offset-4 hover:decoration-paper";
 const HEAD = "px-3 pb-2.5 font-normal first:pl-0 last:pr-0";
 const CELL = "px-3 py-3 first:pl-0 last:pr-0";
+const SCOPES: { key: ValidationScope; label: string }[] = [
+  { key: "current", label: "Current models" },
+  { key: "all", label: "All checks" },
+];
+const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? "" : "s"}`;
+
+/** Says whose accuracy the table reports, and what was left out of it. */
+function coverage(summary: ValidationSummary, scope: ValidationScope): string {
+  const checks = `Across ${plural(summary.validation_count, "completed check")}`;
+  if (scope === "all") return `${checks}, including those of models that have since been replaced.`;
+  const earlier = summary.earlier_count > 0 ? ` ${plural(summary.earlier_count, "earlier check")} tested models that have since been replaced.` : "";
+  return `${checks} of the models now in use.${earlier}`;
+}
+
 const CHART_TARGETS = TARGETS.filter((target) => target !== "lock_wait_count_max").map((key) => ({ key, label: TARGET_LABELS[key].label }));
 
 function AccuracyTable({ summary }: { summary: ValidationSummary }) {
@@ -97,8 +111,9 @@ function Checks({ validations }: { validations: ValidationRecord[] }) {
 }
 
 function Record() {
-  const validations = useValidations();
-  const summary = useValidationSummary();
+  const [scope, setScope] = useState<ValidationScope>("current");
+  const validations = useValidations(scope);
+  const summary = useValidationSummary(scope);
   const [target, setTarget] = useState<Target>("average_latency_ms");
   const points = useMemo(() => validationPoints(validations.data ?? [], target), [validations.data, target]);
 
@@ -106,6 +121,16 @@ function Record() {
   if (validations.isError || summary.isError) {
     const failed = validations.isError ? validations : summary;
     return <ErrorState title="The checks could not be read" message={failed.error!.message} onRetry={() => failed.refetch()} />;
+  }
+  const chooseScope = <Segmented label="Checks shown" options={SCOPES} value={scope} onChange={setScope} />;
+  if (validations.data.length === 0 && summary.data.earlier_count > 0) {
+    return (
+      <Section title="The models now in use have not been checked yet" aside={chooseScope}>
+        <EmptyState title="Start with the form above">
+          {plural(summary.data.earlier_count, "earlier check")} tested models that have since been replaced. They are kept under All checks.
+        </EmptyState>
+      </Section>
+    );
   }
   if (validations.data.length === 0) {
     return (
@@ -115,12 +140,12 @@ function Record() {
     );
   }
   return (
-    <div className="grid gap-14">
-      <div className="grid gap-x-14 gap-y-14 wide:grid-cols-[minmax(0,6fr)_minmax(0,6fr)]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-14">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-14 gap-y-14 wide:grid-cols-[minmax(0,6fr)_minmax(0,6fr)]">
         <Section title="Predicted against measured" note="Each point is one check. The closer to the line, the better the prediction." aside={<Segmented label="Metric plotted" options={CHART_TARGETS} value={target} onChange={setTarget} />}>
           {points.length > 0 ? <AccuracyChart points={points} target={target} /> : <EmptyState title="No completed check has this metric">Choose another metric.</EmptyState>}
         </Section>
-        <Section title="How far off, by metric" note={`Across ${summary.data.validation_count} completed ${summary.data.validation_count === 1 ? "check" : "checks"}.`}>
+        <Section title="How far off, by metric" note={coverage(summary.data, scope)} aside={chooseScope}>
           <AccuracyTable summary={summary.data} />
         </Section>
       </div>

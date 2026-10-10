@@ -123,7 +123,7 @@ export function RunDetail() {
         <p className="mb-10 mt-5 max-w-[62ch] text-base text-graphite">{summary.detail}</p>
         <RunFigures run={run} />
       </header>
-      <div className="grid gap-14">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-14">
         <Telemetry detail={detail.data} />
         <Latency id={id} />
         {run.status === "COMPLETED" && <AdvisorFindings id={id} />}

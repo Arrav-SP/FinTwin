@@ -46,8 +46,9 @@ function LatestRun({ run, updatedAt }: { run: Experiment; updatedAt: number }) {
 }
 
 function PredictionCheck() {
-  const validations = useValidations();
-  const summary = useValidationSummary();
+  // Only checks of the models now in use: an older check says nothing about today's predictions.
+  const validations = useValidations("current");
+  const summary = useValidationSummary("current");
   if (validations.isPending) return <Placeholder className="h-64" label="Loading checked predictions" />;
   if (validations.isError) return <ErrorState title="Checked predictions could not be read" message={validations.error.message} onRetry={() => validations.refetch()} />;
 
@@ -71,7 +72,7 @@ function PredictionCheck() {
         {count != null && (
           <>
             {" "}
-            {count} {count === 1 ? "prediction has" : "predictions have"} been checked in all
+            {count} {count === 1 ? "prediction by the current models has" : "predictions by the current models have"} been checked
             {latencyError != null ? `; average latency missed by ${formatPercent(latencyError)} on average.` : "."}
           </>
         )}
@@ -112,7 +113,7 @@ export function Overview() {
   return (
     <>
       <LatestRun run={latest} updatedAt={experiments.dataUpdatedAt} />
-      <div className="grid gap-x-14 gap-y-14 wide:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-14 gap-y-14 wide:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
         <Section
           title="What was asked against what came back"
           note="Each point is one completed run, placed by the rate it was asked for and what was measured."

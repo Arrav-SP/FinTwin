@@ -129,7 +129,7 @@ export function Models() {
   return (
     <>
       <Intro />
-      <div className="grid gap-14">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-14">
         <Section title="Error on runs held back from training" note={describeTraining(first)}>
           <ModelTable models={models.data} />
           <p className="mt-3 max-w-[78ch] text-xs text-graphite">Typical miss is the mean absolute error. “Without a model” is the miss from predicting the requested rate for throughput, or the scenario’s average for everything else. “Between identical runs” is how much the same workload varies when repeated, which no model can beat.</p>

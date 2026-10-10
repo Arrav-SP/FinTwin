@@ -4,8 +4,10 @@ import type { Assessment, Experiment, ExperimentDetailResponse, Job, JobRequest,
 
 export const useSystemStatus = () => useQuery({ queryKey: ["system-status"], queryFn: () => apiGet<SystemStatus>("/api/system/status"), refetchInterval: 15_000 });
 export const useExperiments = () => useQuery({ queryKey: ["experiments"], queryFn: () => apiGet<Experiment[]>("/api/experiments?limit=500") });
-export const useValidations = () => useQuery({ queryKey: ["validations"], queryFn: () => apiGet<Validation[]>("/api/validation") });
-export const useValidationSummary = () => useQuery({ queryKey: ["validation-summary"], queryFn: () => apiGet<ValidationSummary>("/api/validation/summary") });
+/** "current" keeps only checks predicted by the models now on disk. */
+export type ValidationScope = "current" | "all";
+export const useValidations = (scope: ValidationScope) => useQuery({ queryKey: ["validations", scope], queryFn: () => apiGet<Validation[]>(`/api/validation?scope=${scope}&limit=1000`) });
+export const useValidationSummary = (scope: ValidationScope) => useQuery({ queryKey: ["validation-summary", scope], queryFn: () => apiGet<ValidationSummary>(`/api/validation/summary?scope=${scope}`) });
 
 export const useExperimentDetail = (id: string) => useQuery({ queryKey: ["experiment", id], queryFn: () => apiGet<ExperimentDetailResponse>(`/api/experiments/${id}`) });
 export const useLatencyBreakdown = (id: string) => useQuery({ queryKey: ["experiment-latency", id], queryFn: () => apiGet<LatencyBreakdown>(`/api/experiments/${id}/latency`) });

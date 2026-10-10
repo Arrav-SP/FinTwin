@@ -138,7 +138,7 @@ export function WhatIf() {
       <div className="mt-14" aria-live="polite">
         {sweep.isError && <ErrorState title="No prediction was made" message={sweep.error.message} />}
         {sweep.isSuccess && (
-          <div className="grid gap-14">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-14">
             <Section title={`Predicted response as ${PARAMETER_PHRASES[sweep.data.parameter]} changes`} note="Estimates from the models at each value. Nothing was run against the database." aside={<Segmented label="Prediction plotted" options={SWEEP_VIEWS} value={view} onChange={setView} />}>
               <SweepChart sweep={sweep.data} view={view} trained={ranges[sweep.data.parameter]} />
               {sweep.data.warnings.length > 0 && (

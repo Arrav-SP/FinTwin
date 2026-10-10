@@ -64,7 +64,7 @@ export function Predict() {
       <div className="mt-14" aria-live="polite">
         {predict.isError && <ErrorState title="No prediction was made" message={predict.error.message} />}
         {predict.isSuccess && (
-          <div className="grid gap-14">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-14">
             <Section title="Predicted response" note="Estimates from the models. Nothing was run against the database.">
               <PredictedFigures predictions={predict.data.predictions} />
             </Section>

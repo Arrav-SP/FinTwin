@@ -75,7 +75,24 @@ def _aggregate(records: list[dict[str, Any]]) -> dict[str, Any]:
     return result
 
 
-def summarize_validations(records: list[dict[str, Any]]) -> dict[str, Any]:
+def made_since(records: list[dict[str, Any]], since: datetime | None) -> list[dict[str, Any]]:
+    """The checks whose prediction was made at or after `since`; all of them when it is None.
+
+    A check made before the current models were trained measures a model that no longer exists.
+    """
+    if since is None:
+        return records
+
+    def predicted_at(record: dict[str, Any]) -> datetime | None:
+        stamp = record.get("prediction_timestamp")
+        return datetime.fromisoformat(stamp) if isinstance(stamp, str) else stamp
+
+    return [record for record in records if predicted_at(record) is not None and predicted_at(record) >= since]
+
+
+def summarize_validations(records: list[dict[str, Any]], since: datetime | None = None) -> dict[str, Any]:
+    total = len(records)
+    records = made_since(records, since)
     completed = [record for record in records if record.get("validation_status") == "COMPLETED"]
     by_scenario: dict[str, list[dict[str, Any]]] = {}
     by_concurrency: dict[str, list[dict[str, Any]]] = {}
@@ -92,6 +109,7 @@ def summarize_validations(records: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "validation_count": len(completed),
         "pending_or_failed_count": len(records) - len(completed),
+        "earlier_count": total - len(records),
         "overall": _aggregate(completed),
         "by_scenario": {key: _aggregate(value) for key, value in by_scenario.items()},
         "by_concurrency": {key: _aggregate(value) for key, value in by_concurrency.items()},
@@ -177,5 +195,5 @@ def list_validations(limit: int = 100) -> list[dict[str, Any]]:
     return [_decode(dict(row)) for row in rows]
 
 
-def validation_summary() -> dict[str, Any]:
-    return summarize_validations(list_validations(10000))
+def validation_summary(since: datetime | None = None) -> dict[str, Any]:
+    return summarize_validations(list_validations(10000), since)

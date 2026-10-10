@@ -73,6 +73,8 @@ export interface TargetAccuracy {
 export interface ValidationSummary {
   validation_count: number;
   pending_or_failed_count: number;
+  /** Checks left out because they were predicted before the current models were trained. */
+  earlier_count: number;
   overall: Partial<Record<Target, TargetAccuracy>>;
 }
 

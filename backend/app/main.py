@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+from datetime import datetime
 from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -15,7 +14,8 @@ from .database import check_connection, engine
 from .jobs import JobManager
 from .telemetry import TelemetryCollector
 from .telemetry.metrics import latency_breakdown, summary_select
-from .validation import get_validation, list_validations, run_validation, validation_summary
+from .ui import mount_ui
+from .validation import get_validation, list_validations, made_since, run_validation, validation_summary
 from .workload import Scenario, WorkloadConfig, WorkloadRunner
 from .workload.config import DEFAULT_MIXES
 from .workload.config import MAX_CONCURRENCY
@@ -24,10 +24,9 @@ MAX_TARGET_TPS = 1000.0
 MAX_DURATION_SECONDS = 600.0
 
 APP_ROOT = Path(__file__).resolve().parents[2]
-FRONTEND_ROOT = APP_ROOT / "frontend"
+WEB_ROOT = APP_ROOT / "web" / "dist"
 
-app = FastAPI(title="FinTwin API", version="7.0.0")
-app.mount("/assets", StaticFiles(directory=FRONTEND_ROOT), name="assets")
+app = FastAPI(title="FinTwin API", version="8.0.0")
 jobs = JobManager()
 
 
@@ -79,19 +78,16 @@ def _configuration(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-@app.get("/", include_in_schema=False)
-def frontend() -> FileResponse:
-    return FileResponse(FRONTEND_ROOT / "index.html")
+def _models_trained_at() -> datetime | None:
+    """When the stored models were written, or None when there are none."""
+    from .ml.registry import describe_models
+
+    stamps = [datetime.fromisoformat(model["trained_at"]) for model in describe_models()]
+    return max(stamps) if stamps else None
 
 
-@app.get("/styles.css", include_in_schema=False)
-def frontend_styles() -> FileResponse:
-    return FileResponse(FRONTEND_ROOT / "styles.css", media_type="text/css")
-
-
-@app.get("/app.js", include_in_schema=False)
-def frontend_script() -> FileResponse:
-    return FileResponse(FRONTEND_ROOT / "app.js", media_type="text/javascript")
+def _since(scope: str) -> datetime | None:
+    return _models_trained_at() if scope == "current" else None
 
 
 @app.get("/api/health")
@@ -218,17 +214,18 @@ def recommendations(experiment_id: str) -> dict[str, Any]:
 
 
 @app.get("/api/validation")
-def validations(limit: int = 100) -> list[dict]:
+def validations(limit: int = 100, scope: Literal["all", "current"] = "all") -> list[dict]:
+    """`scope=current` keeps only checks predicted by the models now on disk."""
     try:
-        return list_validations(max(1, min(limit, 1000)))
+        return made_since(list_validations(max(1, min(limit, 1000))), _since(scope))
     except SQLAlchemyError as exc:
         raise HTTPException(status_code=503, detail="Database unavailable") from exc
 
 
 @app.get("/api/validation/summary")
-def validations_summary() -> dict:
+def validations_summary(scope: Literal["all", "current"] = "all") -> dict:
     try:
-        return validation_summary()
+        return validation_summary(_since(scope))
     except SQLAlchemyError as exc:
         raise HTTPException(status_code=503, detail="Database unavailable") from exc
 
@@ -331,3 +328,7 @@ def job_detail(job_id: str) -> dict[str, Any]:
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
+
+
+# Last, so that it only answers addresses no API route claimed.
+mount_ui(app, WEB_ROOT)

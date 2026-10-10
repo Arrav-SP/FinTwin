@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router";
 import { useSystemStatus } from "../api/queries";
 import type { ComponentState } from "../api/types";
+import { Segmented } from "../components/Segmented";
+import { applyTheme, readTheme, type Theme } from "../lib/theme";
 
 const NAVIGATION = [
   { to: "/", label: "Overview", end: true },
@@ -47,7 +50,7 @@ function SystemStatus() {
       {parts.map(([name, state], index) => {
         const healthy = state !== undefined && HEALTHY.includes(state);
         return (
-          <li key={name} className={`items-center gap-2 whitespace-nowrap ${index === 0 ? "flex" : "hidden lg:flex"}`}>
+          <li key={name} className={`items-center gap-2 whitespace-nowrap ${index === 0 ? "flex" : "hidden xl:flex"}`}>
             <span className={`size-2 shrink-0 rounded-full ${state === undefined ? "bg-pencil" : healthy ? "bg-signal" : "bg-red"}`} aria-hidden="true" />
             <span className="max-sm:sr-only">
               {name} <span className={healthy || state === undefined ? "" : "text-red"}>{state === undefined ? "checking" : STATE_TEXT[state]}</span>
@@ -59,6 +62,20 @@ function SystemStatus() {
   );
 }
 
+const THEMES: { key: Theme; label: string }[] = [
+  { key: "dark", label: "Dark" },
+  { key: "light", label: "Light" },
+];
+
+function ThemeChoice() {
+  const [theme, setTheme] = useState<Theme>(readTheme);
+  const choose = (next: Theme) => {
+    applyTheme(next);
+    setTheme(next);
+  };
+  return <Segmented label="Theme" options={THEMES} value={theme} onChange={choose} />;
+}
+
 export function AppShell() {
   return (
     <>
@@ -68,7 +85,8 @@ export function AppShell() {
       <header className="sticky top-0 z-10 border-b border-rule bg-ink/95 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-x-5 px-5 sm:gap-x-8 sm:px-8">
           <Wordmark />
-          <nav aria-label="Sections" className="flex h-full min-w-0 items-stretch gap-4 overflow-x-auto whitespace-nowrap [scrollbar-width:none] sm:gap-6">
+          {/* Below lg the sections can outrun the bar: they scroll sideways, and the fading edge shows there is more. */}
+          <nav aria-label="Sections" className="flex h-full min-w-0 items-stretch gap-4 overflow-x-auto whitespace-nowrap [scrollbar-width:none] max-lg:pr-8 max-lg:[mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)] sm:gap-6">
             {NAVIGATION.map(({ to, label, end }) => (
               <NavLink
                 key={to}
@@ -87,9 +105,15 @@ export function AppShell() {
           </div>
         </div>
       </header>
-      <main id="content" className="mx-auto max-w-[1320px] px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
+      <main id="content" className="mx-auto min-h-[calc(100vh-7.5rem)] max-w-[1320px] px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
         <Outlet />
       </main>
+      <footer className="border-t border-rule">
+        <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-x-8 gap-y-3 px-5 py-5 text-xs text-graphite sm:px-8">
+          <p>A test bench for PostgreSQL under synthetic banking workloads. Every figure is measured or marked as predicted.</p>
+          <ThemeChoice />
+        </div>
+      </footer>
     </>
   );
 }

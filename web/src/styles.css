@@ -38,6 +38,26 @@
 
 @layer base {
   html { color-scheme: dark; scroll-padding-top: 5rem; }
+
+  /*
+   * Light theme: the same roles on warm paper. The names keep their dark-theme meaning
+   * (ink is the page, paper is the text), so no component changes with the theme.
+   * Text colours keep at least 7:1 on the page, pencil 4.5:1; the signal is darkened to stay legible.
+   */
+  html[data-theme="light"] {
+    color-scheme: light;
+    --color-ink: #f5f3ec;
+    --color-well: #fdfcf8;
+    --color-slate: #e8e5da;
+    --color-rule: #d6d2c4;
+    --color-rule-strong: #a9a493;
+    --color-paper: #131e2c;
+    --color-graphite: #414c5a;
+    --color-pencil: #5d6876;
+    --color-signal: #0b7a67;
+    --color-amber: #85560a;
+    --color-red: #b3261e;
+  }
   body {
     margin: 0;
     min-width: 320px;
@@ -108,6 +128,6 @@
   font-weight: 500;
   cursor: pointer;
   transition: background-color 120ms;
-  &:hover { background: #ffffff; }
+  &:hover { background: color-mix(in srgb, var(--color-paper) 86%, var(--color-ink)); }
   &:disabled { cursor: progress; opacity: 0.6; }
 }
