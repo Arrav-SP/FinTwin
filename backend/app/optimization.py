@@ -38,7 +38,7 @@ def analyze_metrics(metrics: dict, thresholds: Thresholds = Thresholds()) -> dic
         add("CONCURRENCY", "HIGH", "Connection pressure", f"Active connections reached {active} of {maximum}.", {"active_connections_max": active, "max_connections": maximum}, "Review connection pooling, burstiness, and client concurrency.", "Potentially fewer connection waits; do not change pool settings automatically.")
     locks = metrics.get("lock_wait_count_max", 0) or 0
     if locks > 0:
-        add("LOCKING", "HIGH", "Lock contention detected", f"Un granted lock count reached {locks}.", {"lock_wait_count_max": locks}, "Investigate transaction duration and concurrent account-update access patterns.", "Potentially lower lock waiting; controlled validation required.")
+        add("LOCKING", "HIGH", "Lock contention detected", f"The number of lock requests waiting reached {locks}.", {"lock_wait_count_max": locks}, "Investigate transaction duration and concurrent account-update access patterns.", "Potentially lower lock waiting; controlled validation required.")
     avg, p95 = metrics.get("average_latency_ms"), metrics.get("p95_latency_ms")
     if avg and p95 and p95 / avg >= thresholds.tail_ratio_high:
         add("LATENCY", "MEDIUM", "Tail latency pressure", f"P95 latency is {p95:.2f} ms versus {avg:.2f} ms average.", {"average_latency_ms": avg, "p95_latency_ms": p95, "ratio": p95 / avg}, "Investigate contention, bursts, and expensive query classes.", "Potentially lower tail latency; validate with repeated experiments.")

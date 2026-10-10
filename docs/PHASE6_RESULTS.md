@@ -1,3 +1,5 @@
+> **Historical record.** This file describes an earlier stage of the project and is kept unchanged below. Its numbers and some of its statements no longer hold. Current results: [RESULTS.md](RESULTS.md). Current interface: [FRONTEND.md](FRONTEND.md).
+
 # FinTwin Phase 6 — Optimization Assessment Results
 
 This assessment analyzed experiment `13c4ef00-b7ba-4f9f-9dd6-ed141e00ebea` from a real `NORMAL_DAY` PostgreSQL workload.

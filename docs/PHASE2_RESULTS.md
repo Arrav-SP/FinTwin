@@ -1,3 +1,5 @@
+> **Historical record.** This file describes an earlier stage of the project and is kept unchanged below. Its numbers and some of its statements no longer hold. Current results: [RESULTS.md](RESULTS.md). Current interface: [FRONTEND.md](FRONTEND.md).
+
 # FinTwin Phase 2 — Workload Generator Results
 
 Phase 2 added configurable, reproducible banking workloads on top of the Phase 1 database.

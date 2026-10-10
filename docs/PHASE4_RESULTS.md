@@ -1,3 +1,5 @@
+> **Historical record.** This file describes an earlier stage of the project and is kept unchanged below. Its numbers and some of its statements no longer hold. Current results: [RESULTS.md](RESULTS.md). Current interface: [FRONTEND.md](FRONTEND.md).
+
 # FinTwin Phase 4 — Measured Results
 
 This document records the actual Phase 4 run results. Values below came from real PostgreSQL workload executions and held-out model evaluation; no performance labels were fabricated.

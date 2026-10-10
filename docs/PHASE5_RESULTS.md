@@ -1,3 +1,5 @@
+> **Historical record.** This file describes an earlier stage of the project and is kept unchanged below. Its numbers and some of its statements no longer hold. Current results: [RESULTS.md](RESULTS.md). Current interface: [FRONTEND.md](FRONTEND.md).
+
 # FinTwin Phase 5 — What-If Results
 
 Phase 5 evaluated hypothetical workload changes using persisted Phase 4 models. These runs did not execute PostgreSQL workloads; all values are model predictions.

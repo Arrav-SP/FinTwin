@@ -1,29 +1,36 @@
-# FinTwin Product UI
+# FinTwin interface
 
-## Running the interface
+The interface lives in `web/`: React 19, TypeScript, Vite, Tailwind CSS 4, TanStack Query, React Router and Recharts. It is built to static files in `web/dist`, which the FastAPI server serves at `http://127.0.0.1:8000/` beside the API. The design rules are in `web/DESIGN.md`; read that before changing anything visual.
 
-Start the FastAPI application and open `http://127.0.0.1:8000/`.
+The first interface (`frontend/`, plain HTML and JavaScript) is no longer served. `docs/UI_RESULTS.md` describes it and is kept as history.
+
+## Commands
 
 ```powershell
-$env:PYTHONPATH = (Get-Location).Path
-uvicorn backend.app.main:app --reload
+npm --prefix web install
+npm --prefix web run build      # needed before the server can show the interface
+npm --prefix web run dev        # development server on port 5173, proxies /api to port 8000
+npm --prefix web test
+npm --prefix web run typecheck
 ```
 
-The interface is implemented with static HTML, CSS, and JavaScript under `frontend/` and is served by FastAPI. It deliberately has no new frontend build tooling or runtime dependencies.
+## Pages
 
-## Pages and live API data
+| Address | Page | Shows |
+|---|---|---|
+| `/` | Overview | The latest run as a sentence, its measured figures, every run plotted as requested against delivered, the latest check of a prediction |
+| `/experiments` | Experiments | Every run |
+| `/experiments/:id` | Run | Telemetry over time, latency by operation, advisor findings, prediction beside measurement where one exists |
+| `/run` | Run a workload | Starts a workload as a background job |
+| `/predict` | Predict | Estimates for a workload, with range warnings |
+| `/what-if` | What if | A sweep of workers or requested rate |
+| `/validation` | Validation | Predict, run, compare; accuracy of the current models, with earlier checks on request |
+| `/models` | Models | Each model's error beside the no-model baseline and run-to-run variation; trained ranges |
 
-| Page | Data source |
-|---|---|
-| Dashboard | Health, system status, real experiment history, and persisted validation data |
-| Experiments | `GET /api/experiments` and `GET /api/experiments/{id}` |
-| Prediction | `POST /api/predictions` using the existing Phase 4 model artifacts |
-| What-If Analysis | `POST /api/what-if` using the existing Phase 5 engine |
-| Optimization | `GET /api/recommendations/{experiment_id}` using the existing Phase 6 engine |
-| Validation | `GET /api/validation`, `GET /api/validation/summary`, and deliberate `POST /api/validation` execution |
+## Data flow
 
-Predicted values are labelled `PREDICTED`; PostgreSQL workload observations are labelled `ACTUAL`. Empty metrics remain unavailable rather than being replaced with zeroes or placeholder performance values. The validation form explicitly warns that it starts a real workload run and waits for the chosen duration.
+Every value on screen comes from the API through the typed client in `web/src/api/`. Nothing is hard-coded or simulated. A missing value is shown as a dash, a failed request shows the server's own message, and an empty list says what to do next. Long work (a run or a validation) is submitted to `POST /api/jobs` and polled until it finishes.
 
-## Design and accessibility
+## The one visual rule
 
-The UI uses a dark technical/fintech visual system, responsive sidebar navigation, readable status indicators, keyboard-focusable controls, semantic buttons/forms/tables, responsive layouts, loading skeletons, and error/empty states. Charts are generated from measured experiment data using an inline SVG implementation to avoid an unnecessary dependency.
+A measured value is drawn filled in the signal colour. A predicted value is drawn hollow and dashed. Nothing else uses the signal colour as a fill.

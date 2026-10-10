@@ -18,7 +18,7 @@ A database-performance test bench, not a personal-finance or LLM app. There is n
 | Path | Contents |
 |---|---|
 | `database/schema.sql` | 6 banking tables (branches, customers, accounts, merchants, transactions, loans), 5 platform tables (experiment_runs, workload_events, telemetry_samples, experiment_summaries, validation_experiments), 15 explicit indexes |
-| `backend/app/main.py`, `ui.py` | FastAPI app, 18 `/api` endpoints; `mount_ui` serves the built UI from `web/dist` with a fallback to `index.html` for page addresses |
+| `backend/app/main.py`, `ui.py` | FastAPI app, 19 `/api` endpoints; `mount_ui` serves the built UI from `web/dist` with a fallback to `index.html` for page addresses |
 | `backend/app/services/transfer_service.py` | `transfer_funds`: one transaction, both rows locked `ORDER BY account_id FOR UPDATE` |
 | `backend/app/workload/` | `config.py` (7 scenarios, 7 operation types, `WorkloadConfig`), `runner.py` (thread pool, open-loop pacing) |
 | `backend/app/telemetry/` | `collector.py` (1 s sampler over pg_stat_activity, pg_stat_database, pg_locks, psutil), `metrics.py` |
@@ -27,9 +27,9 @@ A database-performance test bench, not a personal-finance or LLM app. There is n
 | `frontend/` | Old UI (plain HTML/JS). Retired in F4: no longer served by anything, files left on disk. Delete only if the user asks |
 | `web/` | New UI (F1, redesigned 2026-10-10). React 19 + TypeScript + Vite 8 + Tailwind 4 + TanStack Query + React Router 8 + Recharts. Read `web/DESIGN.md` before touching it. Tokens in `src/styles.css`; top-bar shell in `src/app/`; typed API in `src/api/`; pages Overview, Experiments, run detail (`/experiments/:id`, includes the advisor), Run, Predict, What if, Validation, Models (F2 and F3, 2026-10-10). There is no separate Advisor page and no two-workload comparison; the old UI's features are otherwise covered. Rule: measured = filled signal colour, predicted = hollow dashed. Serif Newsreader for statements, IBM Plex Sans for the interface. No cards, no sidebar, no icons |
 | `scripts/` | CLI entry points (seed, run_workload, train_models, what_if, validate_prediction, run_benchmark, ...) |
-| `tests/` | 8 modules, 24 cases; only `test_phase1.py` (4 cases) needs PostgreSQL |
+| `tests/` | 15 modules, 87 cases; 12 need PostgreSQL (`test_phase1.py`, `test_m1_database.py`, `test_m2_database.py`) |
 | `artifacts/` | git-ignored: 5 models (`.joblib` + `.json`), `validation.json`, `benchmark.csv`, sweep CSVs |
-| `docs/` | phase result notes (`PHASE1..7_RESULTS.md`), partly outdated |
+| `docs/` | `RESULTS.md` (current results), `FRONTEND.md` (current UI). `PHASE*` and `UI_RESULTS.md` are marked historical |
 
 ## Running it (Windows PowerShell, from the project root)
 
@@ -70,7 +70,7 @@ Tests in `tests/test_m2_logic.py` and `tests/test_m2_database.py`. Full backend 
 | `POST /api/what-if/sweep` | `{baseline, parameter: "concurrency"|"target_tps", values}` -> predictions per value and sensitivity |
 | `GET /api/experiments/{id}/latency` | Per-operation latency and queue-wait statistics plus a 1-2-5 histogram |
 
-`workload_events.queue_wait_ms` now records how long each operation waited for a worker; latency remains service time only. `WorkloadRequest` accepts `account_skew` and is bounded like the validation request. The API has 18 endpoints. The old synchronous `POST /api/validation` is kept for the old UI.
+`workload_events.queue_wait_ms` now records how long each operation waited for a worker; latency remains service time only. `WorkloadRequest` accepts `account_skew` and is bounded like the validation request. The API has 19 endpoints. The old synchronous `POST /api/validation` is kept for the old UI.
 
 ## Milestone 3 (done 2026-10-10): campaign and retraining
 
@@ -104,20 +104,27 @@ Tests in `tests/test_f4.py` and `web/src/{lib/theme,app/AppShell,pages/Validatio
 1. The old `frontend/` folder is still on disk although nothing serves it.
 2. API has no authentication; PostgreSQL port 5432 is published by Docker. Local use only.
 3. Endpoints return plain dicts, so the OpenAPI schema has no response types; the `web/` types are written by hand in `src/api/types.ts`.
-4. `README.md`, `docs/` and both PPT decks are out of date (planned for M4).
+4. The two PPT decks were not edited; `PPTs/SLIDE_UPDATES.md` lists the corrections. The DBMS guide deck is built on ten entities; the schema has six.
+
+## Milestone 4 (done 2026-10-10): study, report, docs
+
+- `backend/app/ml/study.py` and `scripts/run_study.py` -> `artifacts/study.json`: learning curve, error by requested-rate band, noise floor, transfer between campaign designs. Tests in `tests/test_m4_study.py`. Findings: error flattens after about 100 runs; almost all error is at 350 TPS and above (37 of 247 runs); a random forest on raw throughput trained on the grid misses random-load runs by 74 TPS, the rate-share model by 4.8.
+- `artifacts/report-facts.json` holds the numbers used in the report (campaign by load level, the saturated run a6dc595b, sweeps).
+- Report: `FinTwin_Final_Project_Review_Report_v2.docx` and `.pdf` (36 pages). Built from the 9 October report by a script that only reads the original; the script and figure scripts were temporary (session scratchpad) and are not in the repository. To rebuild, regenerate from the v2 file with python-docx (system Python 3.14 has python-docx, python-pptx, matplotlib, pymupdf; `.venv-ml` does not). The table of contents is a real Word field: update it through Word after edits.
+- `README.md` rewritten; `docs/RESULTS.md` and `docs/FRONTEND.md` are current; other docs carry a "historical record" note.
+- Advisor message typo fixed ("Un granted lock count").
 
 ## Documents
 
-- Final report: `FinTwin_Final_Project_Review_Report.docx` and `.pdf` (31 pages, built 2026-10-09 from `FinTwin_Project_Review_1_Report_Clean.docx` as the base). It says one validation run was recorded; the database actually holds three. Correct this at the next revision.
-- The report was generated with python-docx plus Word export; the build scripts were temporary and are not in the repository.
+- Current report: `FinTwin_Final_Project_Review_Report_v2.docx` / `.pdf`. The 9 October `FinTwin_Final_Project_Review_Report.docx` / `.pdf` (31 pages) is the earlier edition and was not changed.
+- Do not overwrite any existing report; write a new file.
 - `PROJECT_EXPLANATION.docx` is about an unrelated Linux-timer project.
-- Both decks in `PPTs/` describe 10 entities and a React dashboard; the code has 6 banking tables and plain HTML/JS.
-- `README.md` contradicts itself on project status; `docs/PHASE7_VALIDATION.md` says there is no frontend.
+- UI screenshots in the report are 800 px wide captures in the light theme; better ones need the Browser pane in the foreground.
 
 ## Current state of work
 
 Roadmap approved by the user on 2026-10-10, to be done one milestone at a time with a checkpoint after each. Changes stay local: no commits, no pushes. A source backup and a database dump from before M1 are in `..\FinTwin_backup_2026-10-10`.
 
-Order: M1 backend correctness (done) -> F1 frontend foundation (done 2026-10-10) (React + TypeScript + Vite, design tokens, app shell, typed API client, Overview page) -> M2 new API endpoints (done 2026-10-10) -> F2 core pages (done 2026-10-10: run detail, Predict, What if) -> F3 action pages (done 2026-10-10) -> M3 experiment campaign and retraining (done 2026-10-10) -> F4 polish (done 2026-10-10) -> M4 study, report and slides.
+Order: M1 backend correctness (done) -> F1 frontend foundation (done 2026-10-10) (React + TypeScript + Vite, design tokens, app shell, typed API client, Overview page) -> M2 new API endpoints (done 2026-10-10) -> F2 core pages (done 2026-10-10: run detail, Predict, What if) -> F3 action pages (done 2026-10-10) -> M3 experiment campaign and retraining (done 2026-10-10) -> F4 polish (done 2026-10-10) -> M4 study, report and docs (done 2026-10-10). The roadmap is complete. Possible next work, none of it started: more runs above 300 TPS, longer runs, bursty runs, prediction intervals, editing the slide decks, deleting `frontend/`.
 
 Open decisions: the user has not said whether they want an LLM copilot (default: no, build an evidence-based "Analyst" panel) and has not given a deadline. Installing npm packages for F1 needs their go-ahead.

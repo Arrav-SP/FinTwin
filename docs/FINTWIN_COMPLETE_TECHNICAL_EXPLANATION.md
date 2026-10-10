@@ -1,3 +1,5 @@
+> **Historical record.** Written in September 2026, before the workload, model and interface changes of October. Current results: [RESULTS.md](RESULTS.md). Current interface: [FRONTEND.md](FRONTEND.md).
+
 # FINTWIN — COMPLETE CODEBASE DEEP-DIVE & TECHNICAL EXPLANATION
 
 ## 1. What is FinTwin?

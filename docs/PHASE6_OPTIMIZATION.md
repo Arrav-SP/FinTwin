@@ -1,3 +1,5 @@
+> **Historical record.** This file describes an earlier stage of the project and is kept unchanged below. Its numbers and some of its statements no longer hold. Current results: [RESULTS.md](RESULTS.md). Current interface: [FRONTEND.md](FRONTEND.md).
+
 # Phase 6 — Intelligent Optimization Recommendations
 
 Phase 6 is an advisory, rule-based optimization layer. It consumes measured Phase 3 summaries and optionally query statistics. It does not modify PostgreSQL, create indexes, rewrite SQL, change configuration, or claim causal improvements.

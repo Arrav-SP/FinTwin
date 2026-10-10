@@ -1,3 +1,5 @@
+> **Historical record.** This file describes an earlier stage of the project and is kept unchanged below. Its numbers and some of its statements no longer hold. Current results: [RESULTS.md](RESULTS.md). Current interface: [FRONTEND.md](FRONTEND.md).
+
 # Phase 4 ML Performance Prediction
 
 Phase 4 uses measured Phase 3 experiments as ground-truth labels. The feature pipeline uses only pre-execution workload configuration: scenario, concurrency, target TPS, duration, burstiness, and operation-mix ratios. Measured latency, throughput, CPU, and lock metrics are targets, never predictors, preventing post-execution leakage.
