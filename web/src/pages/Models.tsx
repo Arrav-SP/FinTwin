@@ -1,9 +1,10 @@
 import { useModels } from "../api/queries";
 import type { ModelCard } from "../api/types";
 import { TARGET_LABELS } from "../components/evidence";
+import { describeTraining } from "../components/Predicted";
 import { PageIntro, Section } from "../components/Section";
 import { Command, EmptyState, ErrorState, Placeholder } from "../components/States";
-import { formatDateTime, formatNumber, scenarioLabel } from "../lib/format";
+import { formatNumber, scenarioLabel } from "../lib/format";
 import { evidenceLabel } from "../lib/jobs";
 
 const HEAD = "px-3 pb-2.5 font-normal first:pl-0 last:pr-0";
@@ -13,18 +14,28 @@ const INPUT_LABELS: Record<string, string> = { concurrency: "Workers", target_tp
 
 const Intro = () => <PageIntro title="The models">One model per predicted metric. Each was the best of three candidates on runs it had not seen.</PageIntro>;
 
+/** Whether the model earns its place: it has to miss by less than predicting without one. */
+export function verdict(model: ModelCard): string {
+  if (!model.baseline) return "Not compared";
+  if (model.metrics.mae < model.baseline.mae * 0.95) return "Better than no model";
+  if (model.metrics.mae > model.baseline.mae * 1.05) return "Worse than no model";
+  return "No better than no model";
+}
+
 function ModelTable({ models }: { models: ModelCard[] }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[620px] border-collapse">
+      <table className="w-full min-w-[860px] border-collapse">
         <caption className="sr-only">The chosen model and its held-out error for each metric</caption>
         <thead>
           <tr className="border-b border-rule-strong text-xs text-graphite">
             <th scope="col" className={`${HEAD} text-left`}>Predicts</th>
             <th scope="col" className={`${HEAD} text-left`}>Chosen model</th>
             <th scope="col" className={`${HEAD} text-right`}>Typical miss</th>
-            <th scope="col" className={`${HEAD} text-right`}>RMSE</th>
+            <th scope="col" className={`${HEAD} text-right`}>Without a model</th>
+            <th scope="col" className={`${HEAD} text-right`}>Between identical runs</th>
             <th scope="col" className={`${HEAD} text-right`}>R²</th>
+            <th scope="col" className={`${HEAD} text-left`}>Verdict</th>
           </tr>
         </thead>
         <tbody className="num">
@@ -37,8 +48,10 @@ function ModelTable({ models }: { models: ModelCard[] }) {
                 <td className={`${CELL} text-right`}>
                   {formatNumber(model.metrics.mae, 2)} {unit}
                 </td>
-                <td className={`${CELL} text-right`}>{formatNumber(model.metrics.rmse, 2)}</td>
+                <td className={`${CELL} text-right`}>{formatNumber(model.baseline?.mae, 2)}</td>
+                <td className={`${CELL} text-right`}>{formatNumber(model.repeat_spread, 2)}</td>
                 <td className={`${CELL} text-right`}>{formatNumber(model.metrics.r2, 2)}</td>
+                <td className={CELL}>{verdict(model)}</td>
               </tr>
             );
           })}
@@ -117,8 +130,9 @@ export function Models() {
     <>
       <Intro />
       <div className="grid gap-14">
-        <Section title="Error on runs held back from training" note={`Fitted on ${first.training_samples} runs and tested on ${first.test_samples}, ${formatDateTime(first.trained_at)}. With so few test runs these figures are indications, not measurements of accuracy.`}>
+        <Section title="Error on runs held back from training" note={describeTraining(first)}>
           <ModelTable models={models.data} />
+          <p className="mt-3 max-w-[78ch] text-xs text-graphite">Typical miss is the mean absolute error. “Without a model” is the miss from predicting the requested rate for throughput, or the scenario’s average for everything else. “Between identical runs” is how much the same workload varies when repeated, which no model can beat.</p>
         </Section>
         <Section title="What the models have seen" note="Predictions for workloads outside these ranges are extrapolations.">
           <TrainedOn model={first} />

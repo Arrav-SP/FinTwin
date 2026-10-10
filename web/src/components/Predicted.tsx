@@ -79,15 +79,20 @@ export function TrainedRange({ workload, ranges }: { workload: Record<string, nu
   );
 }
 
+/** How the models were fitted and scored, from what was recorded at training time. */
+export function describeTraining(model: ModelCard): string {
+  const when = formatDateTime(model.trained_at);
+  if (model.cv_folds) {
+    const heldOut = model.held_out === "load settings" ? "each fold holding out every run at a set of loads, so a model is always scored at a load it was not trained on." : "each fold holding out whole workloads.";
+    return `Models fitted on ${model.training_samples} runs of ${model.configurations} workloads, ${when}. Error estimated by ${model.cv_folds}-fold cross-validation, ${heldOut}`;
+  }
+  return `Models fitted on ${model.training_samples} runs and checked on ${model.test_samples} held back, ${when}.`;
+}
+
 /** Where the estimates come from, in the models' own recorded terms. */
 export function ModelProvenance({ models }: { models: ModelCard[] }) {
   if (models.length === 0) return null;
-  const { training_samples, test_samples, trained_at } = models[0];
-  return (
-    <p className="text-xs text-graphite">
-      Models fitted on {training_samples} runs and checked on {test_samples} held back, {formatDateTime(trained_at)}.
-    </p>
-  );
+  return <p className="text-xs text-graphite">{describeTraining(models[0])}</p>;
 }
 
 export function Cautions({ warnings }: { warnings: string[] }) {

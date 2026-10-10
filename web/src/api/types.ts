@@ -129,12 +129,25 @@ export interface LatencyBreakdown {
   histogram: HistogramBucket[];
 }
 
+export interface ModelScores {
+  mae: number;
+  rmse: number;
+  r2: number | null;
+}
+
 export interface ModelCard {
   target: Target;
   algorithm: string;
   training_samples: number;
   test_samples: number;
-  metrics: { mae: number; rmse: number; r2: number };
+  metrics: ModelScores;
+  /** Present on models trained with grouped cross-validation. */
+  configurations?: number;
+  cv_folds?: number;
+  /** What each fold leaves out: "load settings" since evaluation began holding out whole loads. */
+  held_out?: string;
+  baseline?: ModelScores;
+  repeat_spread?: number | null;
   scenario_values: string[];
   numeric_ranges: Record<string, number[]>;
   trained_at: string;
