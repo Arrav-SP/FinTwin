@@ -30,6 +30,7 @@ function renderAt(path: string, session: Session) {
     "fetch",
     vi.fn(async (url: string, init?: RequestInit) => {
       calls.push({ url, method: init?.method ?? "GET" });
+      if (url === "/api/auth/forget") return json(200, { deleted_runs: 1 });
       if (url === "/api/auth/logout") {
         current = VISITOR;
         return new Response(null, { status: 204 });
@@ -68,6 +69,7 @@ describe("a public server, not signed in", () => {
     renderAt("/run", VISITOR);
     expect(await screen.findByText("Sign in to run a workload here")).toBeInTheDocument();
     expect(screen.getByText(/16 workers, 100 TPS and 10 seconds/)).toBeInTheDocument();
+    expect(within(screen.getByRole("main")).getByText(/What you run is visible only to you/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Start the run" })).not.toBeInTheDocument();
     const main = within(screen.getByRole("main"));
     expect(main.getByRole("link", { name: "Sign in with GitHub" })).toHaveAttribute("href", "/api/auth/login");
@@ -83,7 +85,9 @@ describe("a public server, not signed in", () => {
     renderAt("/", VISITOR);
     const footer = within(await screen.findByRole("contentinfo"));
     expect(await footer.findByText(/Public demonstration on shared hardware/)).toBeInTheDocument();
-    expect(footer.getByText(/erased when the server restarts/)).toBeInTheDocument();
+    expect(footer.getByText(/Runs you make are visible only to you/)).toBeInTheDocument();
+    expect(footer.getByText(/without your name, to retrain the models/)).toBeInTheDocument();
+    expect(footer.queryByRole("button", { name: "Delete my runs" })).not.toBeInTheDocument();
   });
 });
 
@@ -109,6 +113,26 @@ describe("a public server, signed in", () => {
     fireEvent.click(header.getByRole("button", { name: "Sign out" }));
     await waitFor(() => expect(calls).toContainEqual({ url: "/api/auth/logout", method: "POST" }));
     expect(await header.findByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/api/auth/login");
+  });
+
+  it("deletes this person's runs only after they confirm", async () => {
+    const calls = renderAt("/", MEMBER);
+    const footer = within(screen.getByRole("contentinfo"));
+    const confirm = vi.fn(() => false);
+    vi.stubGlobal("confirm", confirm);
+    fireEvent.click(await footer.findByRole("button", { name: "Delete my runs" }));
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(calls).not.toContainEqual({ url: "/api/auth/forget", method: "POST" });
+
+    confirm.mockReturnValue(true);
+    fireEvent.click(footer.getByRole("button", { name: "Delete my runs" }));
+    await waitFor(() => expect(calls).toContainEqual({ url: "/api/auth/forget", method: "POST" }));
+  });
+
+  it("marks this person's runs in the list", async () => {
+    renderAt("/experiments", MEMBER);
+    const rows = await screen.findAllByRole("row");
+    expect(rows.filter((row) => within(row).queryByText("yours")).length).toBe(1);
   });
 
   it("can narrow the experiments to the runs this person started", async () => {

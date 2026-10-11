@@ -28,7 +28,7 @@ def public(monkeypatch):
     monkeypatch.setattr(access, "config", lambda: public_config())
     monkeypatch.setattr(access, "predictions", access.RateLimiter(limit=1000, window=60))
     state = {"submitted": [], "recorded": [], "used": 0, "waiting": 0}
-    monkeypatch.setattr(main.jobs, "submit", lambda kind, request, work: state["submitted"].append((kind, request)) or {"job_id": "job-1", "kind": kind, "status": "queued"})
+    monkeypatch.setattr(main.jobs, "submit", lambda kind, request, work, owner=None: state["submitted"].append((kind, request, owner)) or {"job_id": "job-1", "kind": kind, "status": "queued"})
     monkeypatch.setattr(main.jobs, "waiting", lambda: state["waiting"])
     monkeypatch.setattr(access, "runs_used", lambda login: state["used"])
     monkeypatch.setattr(access, "record_run", lambda login, kind: state["recorded"].append((login, kind)))
@@ -87,12 +87,12 @@ def test_rate_limiter_allows_a_burst_then_refuses_until_the_window_passes():
 
 
 def test_public_runs_are_capped_well_below_what_the_runner_allows():
-    access.check_public_caps(concurrency=16, target_tps=100, duration_seconds=10)
-    for over in (dict(concurrency=17, target_tps=100, duration_seconds=10), dict(concurrency=16, target_tps=101, duration_seconds=10), dict(concurrency=16, target_tps=100, duration_seconds=11)):
+    access.check_public_caps(concurrency=8, target_tps=20, duration_seconds=8)
+    for over in (dict(concurrency=9, target_tps=20, duration_seconds=8), dict(concurrency=8, target_tps=21, duration_seconds=8), dict(concurrency=8, target_tps=20, duration_seconds=9)):
         with pytest.raises(HTTPException) as refused:
             access.check_public_caps(**over)
         assert refused.value.status_code == 422
-        assert "16 workers, 100 TPS and 10 seconds" in refused.value.detail
+        assert "8 workers, 20 TPS and 8 seconds" in refused.value.detail
 
 
 # ---------------------------------------------------------------- a private server is unchanged
@@ -100,10 +100,10 @@ def test_public_runs_are_capped_well_below_what_the_runner_allows():
 def test_a_private_server_runs_jobs_for_anyone_and_reports_no_restrictions(monkeypatch):
     monkeypatch.setattr(access, "config", lambda: public_config(public=False))
     submitted = []
-    monkeypatch.setattr(main.jobs, "submit", lambda kind, request, work: submitted.append(kind) or {"job_id": "job-1"})
+    monkeypatch.setattr(main.jobs, "submit", lambda kind, request, work, owner=None: submitted.append((kind, owner)) or {"job_id": "job-1"})
     client = TestClient(app)
     assert client.post("/api/jobs", json={"kind": "workload", "workload": {**WORKLOAD, "concurrency": 64, "target_tps": 600}}).status_code == 202
-    assert submitted == ["workload"]
+    assert submitted == [("workload", None)]  # a private server has no owners
     me = client.get("/api/auth/me").json()
     assert me["public"] is False and me["can_run"] is True
     assert me["run_limits"]["max_target_tps"] == 1000
@@ -121,7 +121,7 @@ def test_a_visitor_can_read_and_predict_but_not_run(public):
     assert public["submitted"] == []
     me = client.get("/api/auth/me").json()
     assert me == {**me, "public": True, "signed_in": False, "login": None, "can_run": False, "sign_in_available": True}
-    assert me["run_limits"] == {"max_concurrency": 16, "max_target_tps": 100, "max_duration_seconds": 10}
+    assert me["run_limits"] == {"max_concurrency": 8, "max_target_tps": 20, "max_duration_seconds": 8}
 
 
 def test_predictions_are_rate_limited_per_visitor_on_a_public_server(public, monkeypatch):
@@ -145,7 +145,7 @@ def test_a_signed_in_person_can_run_a_small_workload_and_it_counts_against_their
     client = signed_in()
     response = client.post("/api/jobs", json={"kind": "validation", "workload": WORKLOAD})
     assert response.status_code == 202
-    assert [kind for kind, _ in public["submitted"]] == ["validation"]
+    assert [(kind, owner) for kind, _, owner in public["submitted"]] == [("validation", "octocat")]
     assert public["recorded"] == [("octocat", "validation")]
     public["used"] = 3
     me = client.get("/api/auth/me").json()
@@ -254,20 +254,6 @@ def owned_run(require_postgres):
     with engine.begin() as connection:
         connection.execute(text("DELETE FROM experiment_runs WHERE experiment_id = :id"), {"id": experiment_id})
         connection.execute(text("DELETE FROM usage_log WHERE login = :login"), {"login": login})
-
-
-def test_a_run_is_marked_as_mine_only_for_the_person_who_started_it_and_names_nobody(owned_run, public):
-    experiment_id, login = owned_run
-    main.claim_run(experiment_id, login)
-
-    def listed(client):
-        return next(run for run in client.get("/api/experiments?limit=5").json() if run["experiment_id"] == experiment_id)
-
-    assert listed(signed_in(login))["mine"] is True
-    assert listed(signed_in("someone-else"))["mine"] is False
-    anonymous = listed(TestClient(app))
-    assert anonymous["mine"] is False and "started_by" not in anonymous
-    assert "started_by" not in TestClient(app).get(f"/api/experiments/{experiment_id}").json()["experiment"]
 
 
 def test_runs_are_counted_per_person_over_the_last_day(owned_run):

@@ -7,7 +7,7 @@ const seconds = (from: string, to: number) => Math.max(Math.round((to - new Date
  * requested duration, which is an estimate: the server does not report progress.
  */
 export function jobProgress(job: Job, now: number): { message: string; fraction: number | null } {
-  if (job.status === "queued" || !job.started_at) return { message: "Waiting for an earlier run to finish", fraction: null };
+  if (job.status === "queued" || !job.started_at) return { message: job.ahead && job.ahead > 1 ? `Waiting for ${job.ahead} earlier runs to finish` : "Waiting for an earlier run to finish", fraction: null };
   if (job.status === "completed" || job.status === "failed") {
     const took = seconds(job.started_at, job.finished_at ? new Date(job.finished_at).getTime() : now);
     return job.status === "completed" ? { message: `Finished in ${took} s`, fraction: 1 } : { message: `Stopped after ${took} s`, fraction: null };

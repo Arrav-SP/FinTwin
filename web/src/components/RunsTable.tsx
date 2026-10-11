@@ -49,6 +49,7 @@ export function RunsTable({ runs, caption }: { runs: Experiment[]; caption: stri
                   <Link to={`/experiments/${run.experiment_id}`} className="text-paper underline decoration-rule-strong underline-offset-4 hover:decoration-paper">
                     {scenarioLabel(run.scenario)}
                   </Link>
+                  {run.mine && <span className="ml-2 text-xs text-graphite">yours</span>}
                   {run.status !== "COMPLETED" && <span className={`ml-2 text-xs ${run.status === "FAILED" ? "text-red" : "text-amber"}`}>{run.status === "FAILED" ? "failed" : "running"}</span>}
                 </td>
                 <td className={`${CELL} text-right`}>{formatInteger(run.configuration.concurrency)}</td>

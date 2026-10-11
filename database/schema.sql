@@ -194,4 +194,23 @@ CREATE TABLE IF NOT EXISTS usage_log (
     submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_usage_log_login_time ON usage_log(login, submitted_at);
+ALTER TABLE validation_experiments ADD COLUMN IF NOT EXISTS started_by VARCHAR(100);
+CREATE INDEX IF NOT EXISTS idx_validation_experiments_started_by ON validation_experiments(started_by);
+
+-- Public mode with an archive. The per-run latency summary is kept with the run, because the
+-- individual events are not archived. Models trained on the site are stored so they survive restarts.
+-- (No semicolons in comments: the schema loader splits this file on them.)
+ALTER TABLE experiment_summaries ADD COLUMN IF NOT EXISTS latency_breakdown JSONB;
+
+CREATE TABLE IF NOT EXISTS model_store (
+    target VARCHAR(40) PRIMARY KEY,
+    trained_at TIMESTAMPTZ,
+    metadata JSONB NOT NULL,
+    artifact BYTEA NOT NULL
+);
+
+-- Rows of usage_log are copied between the site and its archive. Their numeric ids are assigned
+-- separately on each side, so a random key identifies a row across both.
+ALTER TABLE usage_log ADD COLUMN IF NOT EXISTS usage_key UUID NOT NULL DEFAULT gen_random_uuid();
+CREATE UNIQUE INDEX IF NOT EXISTS idx_usage_log_key ON usage_log(usage_key);
 

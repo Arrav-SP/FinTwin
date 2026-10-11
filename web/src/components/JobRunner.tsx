@@ -47,6 +47,7 @@ function SignInFirst({ available, limits }: { available: boolean; limits: RunLim
       <p className="max-w-[62ch]">
         Anyone can read the recorded runs and use Predict and What if. Running a workload loads the shared database, so it needs a sign-in and is limited to {limits.max_concurrency} workers, {limits.max_target_tps} TPS and {limits.max_duration_seconds} seconds.
       </p>
+      <p className="mt-3 max-w-[62ch]">What you run is visible only to you. Its measurements, without your name, are used to retrain the site's models.</p>
       <p className="mt-4">
         {available ? (
           <a href={SIGN_IN_PATH} target="_top" className={LINK}>

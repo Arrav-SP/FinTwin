@@ -59,7 +59,7 @@ function Record({ run }: { run: ExperimentDetail }) {
     ["Hot-account skew", formatNumber(account_skew, 2)],
   ];
   return (
-    <Section title="The record" note="Counts and settings stored with this run.">
+    <Section title="The record" note={run.mine ? "Counts and settings stored with this run. Only you can see this run." : "Counts and settings stored with this run."}>
       <dl className="m-0 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
         {rows.map(([label, value]) => (
           <div key={label}>

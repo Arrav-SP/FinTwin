@@ -14,4 +14,4 @@ docs
 PPTs
 *.docx
 *.pdf
-bundled/database.sql.gz
+build

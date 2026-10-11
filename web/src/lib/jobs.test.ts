@@ -24,6 +24,11 @@ describe("jobProgress", () => {
   it("stops at full and says it is finishing when the run outlasts its duration", () => {
     expect(jobProgress(job({}), at("2026-10-10T04:00:20Z"))).toEqual({ message: "Finishing, 19 s so far", fraction: 1 });
   });
+  it("says how many runs are ahead of a queued job when there are several", () => {
+    expect(jobProgress(job({ status: "queued", started_at: null, ahead: 3 }), at("2026-10-10T04:00:05Z")).message).toBe("Waiting for 3 earlier runs to finish");
+    expect(jobProgress(job({ status: "queued", started_at: null, ahead: 1 }), at("2026-10-10T04:00:05Z")).message).toBe("Waiting for an earlier run to finish");
+  });
+
   it("explains a queued job without inventing progress", () => {
     expect(jobProgress(job({ status: "queued", started_at: null }), at("2026-10-10T04:00:05Z"))).toEqual({ message: "Waiting for an earlier run to finish", fraction: null });
   });

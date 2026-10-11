@@ -29,14 +29,16 @@ SESSION_COOKIE = "fintwin_session"
 STATE_COOKIE = "fintwin_oauth_state"
 SESSION_LIFETIME = 7 * 24 * 3600
 
-# What a signed-in visitor may ask of a shared server: far below the runner's own limits.
-PUBLIC_MAX_CONCURRENCY = 16
-PUBLIC_MAX_TARGET_TPS = 100.0
-PUBLIC_MAX_DURATION_SECONDS = 10.0
+# What a signed-in visitor may ask of a shared server. Measured 2026-10-11 under Render's free limits
+# (512 MB, 0.1 CPU): the whole container delivers about 8 TPS, so these caps reach saturation but
+# keep a run to well under a minute.
+PUBLIC_MAX_CONCURRENCY = 8
+PUBLIC_MAX_TARGET_TPS = 20.0
+PUBLIC_MAX_DURATION_SECONDS = 8.0
 RUNS_PER_DAY = 10
 MAX_WAITING = 5  # runs execute one at a time; beyond this many waiting, new ones are turned away
-PREDICTIONS_PER_MINUTE = 60
-ALL_PREDICTIONS_PER_MINUTE = 900  # for all visitors together
+PREDICTIONS_PER_MINUTE = 20
+ALL_PREDICTIONS_PER_MINUTE = 120  # for all visitors together; a prediction costs real CPU on a small host
 
 
 @dataclass(frozen=True)
@@ -111,6 +113,20 @@ def unsign(token: str, secret: str, now: datetime | None = None) -> dict | None:
     if not isinstance(payload, dict) or payload.get("exp", 0) < (now or datetime.now(timezone.utc)).timestamp():
         return None
     return payload
+
+
+def viewer(request: Request) -> dict:
+    """Parameters for the visibility rule: on a public server a person sees reference rows (no owner) and their own."""
+    return {"public": config().public, "login": current_login(request)}
+
+
+def visible(alias: str) -> str:
+    """SQL for the visibility rule, to be used with the parameters from viewer()."""
+    return f"(NOT :public OR {alias}.started_by IS NULL OR {alias}.started_by = :login)"
+
+
+def may_see(owner: str | None, request: Request) -> bool:
+    return not config().public or owner is None or owner == current_login(request)
 
 
 def current_login(request: Request) -> str | None:

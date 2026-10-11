@@ -23,15 +23,18 @@ class DatasetReport:
     missing_targets: dict[str, int]
 
 
-# A saturated run overruns its requested duration by about half while its queue drains.
-# Several times longer means the machine was suspended mid-run, and its numbers measure the pause.
+# A saturated run overruns its requested duration while its queue drains: by about half on the
+# development laptop, by ten times or more on a host with a tenth of a CPU. A run is taken to have
+# been suspended with the machine only when it took several times its duration and many minutes more.
 INTERRUPTED_FACTOR = 3.0
+INTERRUPTED_EXTRA_SECONDS = 600.0
 
 
 def _interrupted(started_at, completed_at, duration_seconds) -> bool:
     if started_at is None or completed_at is None or not duration_seconds:
         return False
-    return (completed_at - started_at).total_seconds() > INTERRUPTED_FACTOR * float(duration_seconds)
+    elapsed, duration = (completed_at - started_at).total_seconds(), float(duration_seconds)
+    return elapsed > INTERRUPTED_FACTOR * duration and elapsed > duration + INTERRUPTED_EXTRA_SECONDS
 
 
 def rows_to_frame(rows) -> pd.DataFrame:
@@ -75,7 +78,7 @@ def load_experiments() -> pd.DataFrame:
                e.actual_tps, e.average_latency_ms, e.p50_latency_ms, e.p95_latency_ms,
                e.p99_latency_ms, s.host_cpu_avg_percent, s.host_memory_avg_percent,
                s.lock_wait_count_max, s.active_connections_max,
-               s.db_size_before_bytes, s.db_cache_hit_ratio
+               s.db_size_before_bytes, s.db_cache_hit_ratio, e.started_by
         FROM experiment_runs e LEFT JOIN experiment_summaries s USING (experiment_id)
         ORDER BY e.started_at
     """)

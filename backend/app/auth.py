@@ -7,7 +7,10 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse, Response
 
-from . import access
+from sqlalchemy import text
+
+from . import access, archive
+from .database import engine
 from .limits import MAX_CONCURRENCY, MAX_DURATION_SECONDS, MAX_TARGET_TPS
 
 router = APIRouter(prefix="/api/auth")
@@ -69,6 +72,26 @@ def callback(request: Request, code: str = "", state: str = "") -> Response:
     _start_session(response, login)
     response.delete_cookie(access.STATE_COOKIE, path="/api/auth")
     return response
+
+
+@router.post("/forget")
+def forget(request: Request) -> dict[str, Any]:
+    """Delete everything the signed-in person ran, here and in the archive.
+
+    Models already trained keep what they learned from those runs in aggregate; that is stated on the site.
+    """
+    if not access.config().public:
+        raise HTTPException(status_code=404, detail="Not found")
+    login = access.current_login(request)
+    if login is None:
+        raise HTTPException(status_code=401, detail="Sign in to delete your runs.")
+    with engine.begin() as connection:
+        runs = connection.execute(text("SELECT COUNT(*) FROM experiment_runs WHERE started_by = :login"), {"login": login}).scalar_one()
+        connection.execute(text("DELETE FROM validation_experiments WHERE started_by = :login"), {"login": login})
+        connection.execute(text("DELETE FROM experiment_runs WHERE started_by = :login"), {"login": login})
+        connection.execute(text("DELETE FROM usage_log WHERE login = :login"), {"login": login})
+    archive.forget(login)
+    return {"deleted_runs": runs}
 
 
 @router.post("/logout")

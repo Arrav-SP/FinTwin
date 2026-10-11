@@ -22,11 +22,17 @@ def diagnose() -> dict:
     return {"total_experiments": total, "completed_experiments": completed, "usable_experiments": summaries, "unique_configurations": configs, "unique_scenarios": scenarios, "telemetry_samples": samples, "missing_targets": {}, "target_columns": TARGETS}
 
 
-def training_rows(frame):
-    """Completed, uninterrupted runs timed by the current runner, with every target measured."""
+def training_rows(frame, site_only: bool = False):
+    """Completed, uninterrupted runs timed by the current runner, with every target measured.
+
+    With `site_only`, only runs started by a signed-in person on this server: a model describes one
+    machine, and the reference runs were recorded on another.
+    """
     if frame.empty:
         return frame
     rows = frame[(frame["status"] == "COMPLETED") & frame["current_timing"] & ~frame["interrupted"]]
+    if site_only:
+        rows = rows[rows["started_by"].notna()] if "started_by" in rows else rows.iloc[0:0]
     return rows.dropna(subset=[target for target in TARGETS if target in rows])
 
 
@@ -80,13 +86,13 @@ def cross_validate(usable, target, folds: int) -> dict:
     return {"candidates": {name: _scores(actual, values) for name, values in predicted.items()}, "baseline": _scores(actual, baseline)}
 
 
-def train_models(output_dir: Path = Path("artifacts/models")) -> dict:
+def train_models(output_dir: Path = Path("artifacts/models"), site_only: bool = False) -> dict:
     import joblib
     from .features import make_preprocessor
     from .models import build_model
 
     frame, telemetry_count = load_experiments()
-    usable = training_rows(frame)
+    usable = training_rows(frame, site_only)
     configurations = int(usable["configuration_key"].nunique()) if not usable.empty else 0
     scenarios = int(usable["scenario"].nunique()) if not usable.empty else 0
     if len(usable) < 6 or configurations < 4 or scenarios < 2:
@@ -109,6 +115,7 @@ def train_models(output_dir: Path = Path("artifacts/models")) -> dict:
             "target": target,
             "algorithm": name,
             "trained_at": trained_at,
+            "trained_on": "site" if site_only else "reference",
             "training_samples": len(usable),
             "test_samples": len(usable),
             "configurations": configurations,

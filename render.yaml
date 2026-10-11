@@ -1,0 +1,24 @@
+# Render blueprint for the public FinTwin website. See docs/DEPLOY.md for the steps around it.
+# Values marked "sync: false" are entered in the Render dashboard and never stored in the repository.
+services:
+  - type: web
+    name: fintwin
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/public/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: FINTWIN_PUBLIC
+        value: "true"
+      - key: FINTWIN_SESSION_SECRET
+        generateValue: true
+      - key: FINTWIN_BASE_URL
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: FINTWIN_ARCHIVE_URL
+        sync: false

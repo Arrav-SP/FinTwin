@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router";
-import { SIGN_IN_PATH, useSession, useSignOut, useSystemStatus } from "../api/queries";
+import { SIGN_IN_PATH, useForget, useSession, useSignOut, useSystemStatus } from "../api/queries";
 import type { ComponentState } from "../api/types";
 import { Segmented } from "../components/Segmented";
 import { applyTheme, readTheme, type Theme } from "../lib/theme";
@@ -88,10 +88,32 @@ function Account() {
   );
 }
 
+/** Removes everything the signed-in person ran. Asked for twice, because it cannot be undone. */
+function DeleteMyRuns() {
+  const forget = useForget();
+  const ask = () => {
+    if (window.confirm("Delete every run and validation you have made here? This cannot be undone. Models already trained keep what they learned.")) forget.mutate();
+  };
+  return (
+    <p className="mt-2">
+      <button type="button" onClick={ask} disabled={forget.isPending} className={`cursor-pointer border-0 bg-transparent p-0 ${QUIET_LINK}`}>
+        Delete my runs
+      </button>
+      {forget.isSuccess && <span className="ml-3">Deleted {forget.data.deleted_runs} {forget.data.deleted_runs === 1 ? "run" : "runs"}.</span>}
+      {forget.isError && <span className="ml-3 text-red">{forget.error.message}</span>}
+    </p>
+  );
+}
+
 function About() {
   const session = useSession().data;
   if (session?.public) {
-    return <p className="max-w-[86ch]">Public demonstration on shared hardware. The data is synthetic, the models were trained on a different machine, and runs made here are erased when the server restarts.</p>;
+    return (
+      <div className="max-w-[86ch]">
+        <p>Public demonstration on shared hardware, with synthetic data. Runs you make are visible only to you, and their measurements are used, without your name, to retrain the models.</p>
+        {session.signed_in && <DeleteMyRuns />}
+      </div>
+    );
   }
   return <p>A test bench for PostgreSQL under synthetic banking workloads. Every figure is measured or marked as predicted.</p>;
 }

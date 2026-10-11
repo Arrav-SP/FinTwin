@@ -48,8 +48,9 @@ class WorkloadResult:
 class WorkloadRunner:
     """Execute a bounded banking workload using SQLAlchemy's connection pool."""
 
-    def __init__(self, config: WorkloadConfig):
+    def __init__(self, config: WorkloadConfig, started_by: str | None = None):
         self.config = config
+        self.started_by = started_by  # the signed-in person on a public server; None for reference runs
         self.random = random.Random(config.seed)
         self._account_ids: list[int] = []
         self._account_weights: list[float] | None = None
@@ -128,9 +129,9 @@ class WorkloadRunner:
     def _create_experiment(self, experiment_id: UUID, started_at: datetime) -> None:
         with engine.begin() as connection:
             connection.execute(text("""
-                INSERT INTO experiment_runs (experiment_id, scenario, configuration, started_at, status)
-                VALUES (:experiment_id, :scenario, CAST(:configuration AS JSONB), :started_at, 'RUNNING')
-            """), {"experiment_id": experiment_id, "scenario": self.config.scenario.value, "configuration": self._configuration_json(), "started_at": started_at})
+                INSERT INTO experiment_runs (experiment_id, scenario, configuration, started_at, status, started_by)
+                VALUES (:experiment_id, :scenario, CAST(:configuration AS JSONB), :started_at, 'RUNNING', :started_by)
+            """), {"experiment_id": experiment_id, "scenario": self.config.scenario.value, "configuration": self._configuration_json(), "started_at": started_at, "started_by": self.started_by})
 
     def _complete_experiment(self, result: WorkloadResult) -> None:
         with engine.begin() as connection:

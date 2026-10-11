@@ -8,6 +8,9 @@ export interface SystemStatus {
   ml_models: ComponentState;
   telemetry_samples: number | null;
   model_artifacts: number;
+  /** On a public server: runs made on the site, and how many are needed before it retrains on them. */
+  site_runs?: number | null;
+  site_runs_needed?: number | null;
 }
 
 export interface RunLimits {
@@ -59,6 +62,8 @@ export interface Experiment {
   telemetry_sample_count: number | null;
   /** True when the signed-in person started this run. The server never says who else did. */
   mine?: boolean;
+  /** True for a recorded reference run, which belongs to nobody. */
+  reference?: boolean;
 }
 
 export const TARGETS = ["average_latency_ms", "p95_latency_ms", "actual_tps", "host_cpu_avg_percent", "lock_wait_count_max"] as const;
@@ -166,6 +171,8 @@ export interface ModelCard {
   /** Present on models trained with grouped cross-validation. */
   configurations?: number;
   cv_folds?: number;
+  /** "site" when trained on runs made on the public server, "reference" when trained on the recorded runs. */
+  trained_on?: "site" | "reference";
   /** What each fold leaves out: "load settings" since evaluation began holding out whole loads. */
   held_out?: string;
   baseline?: ModelScores;
@@ -225,6 +232,8 @@ export interface Job {
   finished_at: string | null;
   result: { experiment_id: string | null; validation_id?: string } | null;
   error: string | null;
+  /** Unfinished jobs submitted before this one. */
+  ahead?: number;
 }
 
 export interface Recommendation {

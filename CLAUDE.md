@@ -27,7 +27,7 @@ A database-performance test bench, not a personal-finance or LLM app. There is n
 | `frontend/` | Old UI (plain HTML/JS). Retired in F4: no longer served by anything, files left on disk. Delete only if the user asks |
 | `web/` | New UI (F1, redesigned 2026-10-10). React 19 + TypeScript + Vite 8 + Tailwind 4 + TanStack Query + React Router 8 + Recharts. Read `web/DESIGN.md` before touching it. Tokens in `src/styles.css`; top-bar shell in `src/app/`; typed API in `src/api/`; pages Overview, Experiments, run detail (`/experiments/:id`, includes the advisor), Run, Predict, What if, Validation, Models (F2 and F3, 2026-10-10). There is no separate Advisor page and no two-workload comparison; the old UI's features are otherwise covered. Rule: measured = filled signal colour, predicted = hollow dashed. Serif Newsreader for statements, IBM Plex Sans for the interface. No cards, no sidebar, no icons |
 | `scripts/` | CLI entry points (seed, run_workload, train_models, what_if, validate_prediction, run_benchmark, ...) |
-| `tests/` | 17 modules, 120 cases; 15 need PostgreSQL |
+| `tests/` | 20 modules, 151 cases; about 30 need PostgreSQL |
 | `artifacts/` | git-ignored: 5 models (`.joblib` + `.json`), `validation.json`, `benchmark.csv`, sweep CSVs |
 | `docs/` | `RESULTS.md` (current results), `FRONTEND.md` (current UI). `PHASE*` and `UI_RESULTS.md` are marked historical |
 
@@ -129,18 +129,29 @@ Tests in `tests/test_release.py`. Backend suite: 93 passed.
 
 ## Public website (built 2026-10-11, not yet deployed)
 
-Tests in `tests/test_public.py`, `tests/test_release.py`, `web/src/pages/Public.test.tsx`. Backend 120 passed, interface 82 passed. User guide: `docs/DEPLOY.md`.
+Target: Render free web service + Neon archive + GitHub sign-in. (Hugging Face Docker Spaces became paid in July 2026; that path was removed.) User guide: `docs/DEPLOY.md`. Approved plan: `C:\\Users\\arrav\\.claude\\plans\\linked-snacking-patterson.md`. Backend 151 passed, interface 89 passed.
 
-- Off by default. `FINTWIN_PUBLIC=true` turns it on (`backend/app/config.py`). Other settings: `FINTWIN_BASE_URL`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `FINTWIN_SESSION_SECRET`, `FINTWIN_DEV_LOGIN`.
-- `backend/app/access.py`: caps (16 workers, 100 TPS, 10 s), 10 runs per person per day (`usage_log` table), at most 5 jobs waiting, 60 predictions a minute per visitor and 900 for everyone, HMAC-signed session cookie, GitHub OAuth without scopes. `backend/app/auth.py`: `/api/auth/me`, `/login`, `/callback`, `/logout`. Tests replace `access.config` to switch modes.
-- Public rules: anyone reads and predicts; `POST /api/jobs` needs a session (401 otherwise); the synchronous `POST /api/validation` is closed (403). `experiment_runs.started_by` holds the GitHub login and is never returned; the list returns `mine` instead.
-- `FINTWIN_DEV_LOGIN` signs in without GitHub but only when the base URL host is localhost/127.0.0.1. Keep that guard.
-- Interface: `useSession`; header shows Sign in or the login with Sign out (public only); `JobRunner` shows a sign-in notice or the capped form with runs left; Experiments has a Mine filter; the footer states it is a public demonstration.
-- The API now runs `initialize_schema()` on startup (errors swallowed), so new columns appear on existing databases.
-- Hosting target: Hugging Face Spaces, Docker SDK, port 7860. `deploy/space/` holds the all-in-one Dockerfile (postgres:16-bookworm plus Python, user 1000, database restored at build time), `start.sh` and the Space README. `python scripts/build_space.py` assembles `build/space` (git-ignored via `build/`), splits the dump into 8 MB parts, keeps `build/space/.git`.
-- Verified locally 2026-10-11 by building and running the image: starts in about 4 s, visitor gets 401 on jobs and 200 on predictions, dev sign-in works, a capped validation ran and showed under Mine, allowance dropped to 9. Not verified: the real GitHub round trip and the behaviour on Spaces itself (needs the user's accounts). Screenshots were unavailable; pages were checked through the DOM.
-- Dropped from the plan: retraining models on the Space. Its disk is wiped on restart, so there is no "once"; the footer and the Validation page state the mismatch instead.
-- The user creates the Space and the GitHub OAuth app and pushes `build/space` themselves. Never enter their secrets or push for them.
+**Modes.** Off by default; `FINTWIN_PUBLIC=true` turns it on. Settings in `backend/app/config.py`: `FINTWIN_BASE_URL`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `FINTWIN_SESSION_SECRET`, `FINTWIN_DEV_LOGIN`, `FINTWIN_ARCHIVE_URL`, `FINTWIN_SITE_MIN_RUNS` (60), `FINTWIN_RETRAIN_EVERY` (25). Tests switch modes by replacing `access.config`.
+
+**Access (`backend/app/access.py`, `auth.py`).** Anyone reads and predicts; `POST /api/jobs` needs a session; the synchronous `POST /api/validation` is closed. Caps 8 workers / 20 TPS / 8 s, 10 runs per person per day (`usage_log`), 5 jobs waiting, 20 predictions a minute per visitor and 120 overall. HMAC-signed session cookie, GitHub OAuth with no scopes. `FINTWIN_DEV_LOGIN` signs in without GitHub only when the base URL host is local; keep that guard.
+
+**Privacy.** `started_by` on `experiment_runs` and `validation_experiments`, set when the row is created (`WorkloadRunner(config, started_by=)`, `run_validation(..., started_by=)`); `NULL` means a reference run. Rule `access.visible()` / `may_see()`: reference or mine. Applied to the experiments list, detail, latency, recommendations, validation list and detail (404 for someone else's), and jobs (`JobManager` keeps owners; lists are per owner; `ahead` gives queue position). `started_by` is never returned; lists carry `mine` and `reference`. The validation summary is an anonymous aggregate over everyone. `POST /api/auth/forget` deletes a person's rows locally and in the archive.
+
+**Archive (`backend/app/archive.py`).** The container's own PostgreSQL stays the working database; the archive is a copy. `sync()` after every job pushes finished site runs, their summaries and telemetry, validations and `usage_log`; `restore()` in `scripts/serve.py::prepare` copies them back and writes `model_store` into `artifacts/models`. Reference runs and `workload_events` are not archived; the per-run latency summary is stored in `experiment_summaries.latency_breakdown` and the latency endpoint falls back to it. Rows are matched by UUIDs (`usage_log.usage_key`), never by numeric ids, because the two databases number rows independently. Archive failures are logged and never fail a run.
+
+**Retraining (`backend/app/ml/retrain.py`).** `main._queue_retraining_if_due` runs after each job on a public server: at `site_min_runs` completed site runs, then every `retrain_every`, it queues a `training` job (owner None) on the same queue. `train_models(site_only=True)` uses only owned rows; metadata gets `trained_on` and `site_runs_at_training`; training writes to `artifacts/models.new` and swaps in only on success; `archive.save_models` stores the joblibs. `ml/predict.py` caches loaded models by mtime and `warm()` loads them at startup on a public server.
+
+**Other changes made for this.** Interrupted-run rule is now elapsed > 3x duration AND > duration + 600 s (a saturated run on a slow host is not an interruption). `initialize_schema` takes `target_engine` and runs on API startup. Schema comments must not contain semicolons: the loader splits the file on them.
+
+**Packaging.** `deploy/public/Dockerfile` (postgres:16-bookworm + Python, user 1000, reference database restored at build time, build context = repository root), `deploy/public/start.sh` (small PostgreSQL settings), `render.yaml`. `scripts/serve.py` listens on `$PORT`. Local trial: `docker build -f deploy/public/Dockerfile -t fintwin-public .`
+
+**Measured 2026-10-11 under `--memory=512m --cpus=0.1`.** Starts in about 25 s; idle 108 MiB, 330 MiB with models loaded; the whole container delivers about 8 TPS (100 TPS requested gave 7.8 and took 127 s for a 10 s run); first prediction 27 s cold, 0.3 s once warmed and cached; a training pass on 247 rows took 62 s and peaked at 463 MiB as a separate process; an in-server retraining on 8 site runs completed without an out-of-memory kill (its peak was not captured). The API is sluggish while training.
+
+**Verified end to end locally** with a second PostgreSQL container as the archive: caps refused; 8 runs archived; automatic retraining switched the models to `trained_on: site`; after a container restart a different person saw 278 reference runs and none of the first person's (404 on run, latency, advisor, validation; empty job list); the owner got all 8 runs, the allowance and the latency summary back; delete-my-runs emptied both databases. Screenshots were unavailable; new interface pieces were checked through tests only.
+
+**Not verified:** the real GitHub round trip, Neon and Render themselves. The user creates those accounts, enters the secrets and pushes; never do that for them.
+
+**Leftovers on this machine:** a database `fintwin_archive_test` in the local PostgreSQL container (used by `tests/test_archive.py`), and the Docker image `fintwin-public`.
 
 ## Documents
 

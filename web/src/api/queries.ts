@@ -9,6 +9,11 @@ export const useSignOut = () => {
   const queryClient = useQueryClient();
   return useMutation({ mutationFn: () => apiPost<void>("/api/auth/logout", {}), onSuccess: () => queryClient.invalidateQueries() });
 };
+/** Deletes everything the signed-in person ran. */
+export const useForget = () => {
+  const queryClient = useQueryClient();
+  return useMutation({ mutationFn: () => apiPost<{ deleted_runs: number }>("/api/auth/forget", {}), onSuccess: () => queryClient.invalidateQueries() });
+};
 export const SIGN_IN_PATH = "/api/auth/login";
 export const useExperiments = () => useQuery({ queryKey: ["experiments"], queryFn: () => apiGet<Experiment[]>("/api/experiments?limit=500") });
 /** "current" keeps only checks predicted by the models now on disk. */

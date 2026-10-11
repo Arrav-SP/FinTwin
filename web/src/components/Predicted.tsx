@@ -1,4 +1,5 @@
-import type { ModelCard } from "../api/types";
+import { useSystemStatus } from "../api/queries";
+import type { ModelCard, SystemStatus } from "../api/types";
 import { formatDateTime, formatNumber } from "../lib/format";
 import { type Range, rangeCheck } from "../lib/workload";
 import { TARGET_LABELS } from "./evidence";
@@ -84,15 +85,36 @@ export function describeTraining(model: ModelCard): string {
   const when = formatDateTime(model.trained_at);
   if (model.cv_folds) {
     const heldOut = model.held_out === "load settings" ? "each fold holding out every run at a set of loads, so a model is always scored at a load it was not trained on." : "each fold holding out whole workloads.";
-    return `Models fitted on ${model.training_samples} runs of ${model.configurations} workloads, ${when}. Error estimated by ${model.cv_folds}-fold cross-validation, ${heldOut}`;
+    const runs = model.trained_on === "site" ? `${model.training_samples} runs made on this site, covering ${model.configurations} workloads` : `${model.training_samples} runs of ${model.configurations} workloads`;
+    return `Models fitted on ${runs}, ${when}. Error estimated by ${model.cv_folds}-fold cross-validation, ${heldOut}`;
   }
   return `Models fitted on ${model.training_samples} runs and checked on ${model.test_samples} held back, ${when}.`;
+}
+
+/**
+ * On a public server: whether the models describe this server or another machine.
+ * A model learns one machine, so this decides how far a prediction can be trusted here.
+ */
+export function siteTrainingNote(model: ModelCard, status: Pick<SystemStatus, "site_runs" | "site_runs_needed"> | undefined): string | null {
+  if (!status || status.site_runs == null || status.site_runs_needed == null) return null;
+  if (model.trained_on === "site") return "These models describe this server: they were trained on runs made here by everyone who signed in, and are retrained as more are made.";
+  return `These models were trained on another machine, so measurements made here will differ from them. ${status.site_runs} of the ${status.site_runs_needed} runs needed have been made on this site; after that it retrains on its own runs.`;
+}
+
+export function SiteTraining({ model }: { model: ModelCard }) {
+  const note = siteTrainingNote(model, useSystemStatus().data);
+  return note ? <p className="mt-2 max-w-[78ch] border-l-2 border-amber pl-3 text-xs text-paper">{note}</p> : null;
 }
 
 /** Where the estimates come from, in the models' own recorded terms. */
 export function ModelProvenance({ models }: { models: ModelCard[] }) {
   if (models.length === 0) return null;
-  return <p className="text-xs text-graphite">{describeTraining(models[0])}</p>;
+  return (
+    <div>
+      <p className="text-xs text-graphite">{describeTraining(models[0])}</p>
+      <SiteTraining model={models[0]} />
+    </div>
+  );
 }
 
 export function Cautions({ warnings }: { warnings: string[] }) {

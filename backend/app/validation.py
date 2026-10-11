@@ -55,7 +55,7 @@ def _aggregate(records: list[dict[str, Any]]) -> dict[str, Any]:
     # when the validated workloads differ; repeats of one configuration leave only noise.
     varied = len({_configuration_identity(record) for record in records}) > 1
     for target in VALIDATION_TARGETS:
-        pairs = [(r.get("predicted_metrics", {}).get(prediction_key(target)), r.get("actual_metrics", {}).get(target)) for r in records]
+        pairs = [((r.get("predicted_metrics") or {}).get(prediction_key(target)), (r.get("actual_metrics") or {}).get(target)) for r in records]
         pairs = [(float(p), float(a)) for p, a in pairs if p is not None and a is not None]
         if not pairs:
             continue
@@ -126,12 +126,12 @@ def _json(value: Any) -> str:
     return json.dumps(value, default=str)
 
 
-def _insert(validation_id: UUID, prediction_id: UUID, config: WorkloadConfig) -> None:
+def _insert(validation_id: UUID, prediction_id: UUID, config: WorkloadConfig, started_by: str | None = None) -> None:
     with engine.begin() as connection:
         connection.execute(text("""
-            INSERT INTO validation_experiments (validation_id, prediction_id, scenario, workload_configuration, prediction_timestamp, validation_status)
-            VALUES (:validation_id, :prediction_id, :scenario, CAST(:configuration AS JSONB), :timestamp, 'PENDING')
-        """), {"validation_id": validation_id, "prediction_id": prediction_id, "scenario": config.scenario.value, "configuration": _json(_configuration(config)), "timestamp": datetime.now(timezone.utc)})
+            INSERT INTO validation_experiments (validation_id, prediction_id, scenario, workload_configuration, prediction_timestamp, validation_status, started_by)
+            VALUES (:validation_id, :prediction_id, :scenario, CAST(:configuration AS JSONB), :timestamp, 'PENDING', :started_by)
+        """), {"validation_id": validation_id, "prediction_id": prediction_id, "scenario": config.scenario.value, "configuration": _json(_configuration(config)), "timestamp": datetime.now(timezone.utc), "started_by": started_by})
 
 
 def _update(validation_id: UUID, **values: Any) -> None:
@@ -152,10 +152,10 @@ def _actual_metrics(experiment_id: UUID) -> dict[str, Any]:
     return {key: (float(value) if value is not None else None) for key, value in row.items()}
 
 
-def run_validation(config: WorkloadConfig, model_dir: Path = Path("artifacts/models"), telemetry_interval: float = 1.0) -> dict[str, Any]:
+def run_validation(config: WorkloadConfig, model_dir: Path = Path("artifacts/models"), telemetry_interval: float = 1.0, started_by: str | None = None) -> dict[str, Any]:
     """Predict, execute the same configuration, and compare only real measurements."""
     validation_id, prediction_id = uuid4(), uuid4()
-    _insert(validation_id, prediction_id, config)
+    _insert(validation_id, prediction_id, config, started_by)
     try:
         _update(validation_id, validation_status="RUNNING")
         # Keep the base API importable when the optional native ML stack is not installed.
@@ -163,7 +163,7 @@ def run_validation(config: WorkloadConfig, model_dir: Path = Path("artifacts/mod
 
         prediction = predict_performance({"scenario": config.scenario.value, "concurrency": config.concurrency, "target_tps": config.target_tps, "duration_seconds": config.duration_seconds, "operation_mix": dict(config.operation_mix), "burstiness": config.burstiness, "account_skew": config.account_skew}, model_dir)
         _update(validation_id, predicted_metrics=_json(prediction["predictions"]), model_version=_json({"model_dir": str(model_dir), "warnings": prediction.get("warnings", [])}))
-        result = WorkloadRunner(config).run(TelemetryCollector(telemetry_interval))
+        result = WorkloadRunner(config, started_by=started_by).run(TelemetryCollector(telemetry_interval))
         actual = _actual_metrics(result.experiment_id)
         errors = calculate_errors(prediction["predictions"], actual)
         completed = datetime.now(timezone.utc)

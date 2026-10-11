@@ -1,126 +1,146 @@
 # Putting FinTwin online
 
-This guide publishes FinTwin as a free public website on Hugging Face Spaces. Visitors can read every recorded run and use Predict and What if. People who sign in with GitHub can run small workloads.
+This guide publishes FinTwin as a free public website on **Render**, with **Neon** keeping the data and **GitHub** handling sign-in. Allow about 45 minutes the first time. Free-tier terms change; check each provider's pricing page before you start.
 
-Everything needed is already in the repository. You create two accounts' worth of settings (a Space and a GitHub sign-in app), paste four values, and push one folder. Allow about 30 minutes the first time.
-
-## What the public site does and does not allow
+## What the site does
 
 | Who | Can do |
 |---|---|
-| Anyone | Read all runs, models and validation results; use Predict and What if (60 predictions a minute each) |
-| Signed in with GitHub | Also run a workload or a validation: up to 16 workers, 100 TPS and 10 seconds, 10 runs a day, one run at a time for the whole site |
+| Anyone | Read the 278 recorded reference runs, the models and their accuracy; use Predict and What if |
+| Signed in with GitHub | Also run a workload or a validation: up to 8 workers, 20 TPS and 8 seconds, 10 runs a day, one run at a time for the whole site |
 
-- No password is stored. GitHub confirms who the person is; the site keeps only their GitHub login name, and shows it to nobody else.
-- The site resets. A free Space has no permanent disk, so when it restarts it returns to the recorded dataset and runs made by visitors are gone.
-- The models were trained on a different machine. Measurements on the Space will differ from predictions, most of all for host CPU. The site says so in its footer.
-- A free Space sleeps when idle and takes a short while to wake for the next visitor.
+- **Runs are private.** A person sees the reference runs and their own runs. Someone else's run, its latency, advisor findings and validations answer "not found", exactly as if they did not exist.
+- **Models learn from everyone.** Once 60 runs have been made on the site, it retrains itself on site runs only, and again after every 25 more. Until then it shows the laptop-trained models with a notice that they describe another machine.
+- **No password is stored.** GitHub confirms who a person is. The site keeps only their GitHub login name, shows it to nobody, and uses it to decide which runs are theirs.
+- **People can delete their runs** with "Delete my runs" in the footer. Models already trained keep what they learned in aggregate.
 
-## Step 1: test the public version on your own machine (optional but recommended)
+## Why three services
+
+- **Render** runs the container (PostgreSQL, API and interface together). Its free tier gives 512 MB and a fraction of a CPU, sleeps after 15 idle minutes, and **wipes the container's disk on every restart**.
+- **Neon** is a free PostgreSQL database that does not expire. FinTwin copies each finished run, each person's allowance and each retrained model to it, and copies them back when the site wakes. Without Neon the site still works, but visitors' runs vanish at every sleep and there is nothing lasting to train on.
+- **GitHub** provides sign-in.
+
+## What to expect from free hardware
+
+Measured on 2026-10-11 by running the image under the same limits (512 MB, 0.1 CPU):
+
+- The whole site delivers about **8 TPS**. A run asking for more saturates, which is why the caps are low. Saturated runs can take a minute or more.
+- A page of data loads in well under a second. After a restart, the first prediction is quick only once a background warm-up has finished (under a minute).
+- Retraining takes a few minutes and makes the site sluggish while it runs. It goes through the same queue as runs, so it never overlaps a measurement.
+- After sleeping, the site takes up to a minute to answer the first visitor.
+
+## Step 1: try it on your own machine (optional, recommended)
 
 From the project root, with Docker running:
 
 ```powershell
-python scripts/build_space.py
-docker build -t fintwin-space build/space
-docker run --rm -p 127.0.0.1:7860:7860 -e FINTWIN_BASE_URL=http://127.0.0.1:7860 -e FINTWIN_DEV_LOGIN=tester fintwin-space
+docker build -f deploy/public/Dockerfile -t fintwin-public .
+docker run --rm -p 127.0.0.1:7860:7860 -e PORT=7860 -e FINTWIN_BASE_URL=http://127.0.0.1:7860 -e FINTWIN_DEV_LOGIN=tester fintwin-public
 ```
 
-Open `http://127.0.0.1:7860/`. You are a visitor: the Run and Validation pages ask you to sign in. Click **Sign in**; because the address is local and `FINTWIN_DEV_LOGIN` is set, you are signed in as "tester" without GitHub. This stand-in is ignored on any address that is not local, so it cannot be used on the real site.
+Open `http://127.0.0.1:7860/`. Click **Sign in**: because the address is local and `FINTWIN_DEV_LOGIN` is set, you are signed in as "tester" without GitHub. That stand-in is ignored on any address that is not local, so it cannot be used on the real site. No archive is configured in this trial, so your runs last until you stop the container.
 
-## Step 2: create the Space
+## Step 2: commit and push the code to GitHub
 
-1. Create a free account at `https://huggingface.co` if you do not have one.
-2. Go to `https://huggingface.co/new-space`.
-3. Name it (for example `fintwin`), choose **Docker** as the SDK and the **Blank** template, keep the free CPU hardware, set visibility to **Public**, and create it.
-4. Note the two addresses. If your username is `yourname` and the Space is `fintwin`:
-   - Space page: `https://huggingface.co/spaces/yourname/fintwin`
-   - Direct address: `https://yourname-fintwin.hf.space` (this is the one to share, and the one used below)
+Render builds from your GitHub repository, so the public-site code must be there. Commit and push as you normally do. The repository must contain `render.yaml`, `deploy/public/`, `bundled/` and the rest of the project.
 
-## Step 3: create the GitHub sign-in app
+## Step 3: create the Neon database
+
+1. Sign up at `https://neon.com` and create a project (any name, any region near you; PostgreSQL 16 or later).
+2. On the project dashboard click **Connect** and copy the connection string. It looks like `postgresql://user:password@ep-something.region.aws.neon.tech/neondb?sslmode=require`.
+3. Keep it private: it contains the database password. You will paste it into Render in step 5.
+
+You do not create any tables. FinTwin creates them the first time it connects.
+
+## Step 4: create the Render service
+
+1. Sign up at `https://render.com` and connect your GitHub account.
+2. Choose **New → Blueprint**, pick the FinTwin repository, and confirm. Render reads `render.yaml` and proposes one free web service named `fintwin`.
+3. Render asks for four values. Leave them blank for now if it lets you, or enter placeholders; you will fill them in step 5. Create the service.
+4. Note the address Render gives the service, for example `https://fintwin-abcd.onrender.com`. This is the site's address.
+
+The first build takes several minutes.
+
+## Step 5: create the GitHub sign-in app
 
 1. On GitHub open **Settings → Developer settings → OAuth Apps → New OAuth App** (`https://github.com/settings/developers`).
 2. Fill in:
    - Application name: `FinTwin`
-   - Homepage URL: `https://yourname-fintwin.hf.space`
-   - Authorization callback URL: `https://yourname-fintwin.hf.space/api/auth/callback`
-3. Register it. Copy the **Client ID**.
-4. Click **Generate a new client secret** and copy the secret. GitHub shows it only once.
+   - Homepage URL: your Render address, for example `https://fintwin-abcd.onrender.com`
+   - Authorization callback URL: the same address followed by `/api/auth/callback`
+3. Register it and copy the **Client ID**.
+4. Click **Generate a new client secret** and copy it. GitHub shows it once.
 
 The app asks for no permissions. It can only learn the public login name of a person who approves it.
 
-## Step 4: give the Space its settings
+## Step 6: give Render its settings
 
-On the Space page open **Settings → Variables and secrets** and add:
+In the Render dashboard open the service, then **Environment**, and set:
 
-| Kind | Name | Value |
-|---|---|---|
-| Variable | `FINTWIN_BASE_URL` | `https://yourname-fintwin.hf.space` (no trailing slash) |
-| Variable | `GITHUB_CLIENT_ID` | the Client ID from step 3 |
-| Secret | `GITHUB_CLIENT_SECRET` | the client secret from step 3 |
-| Secret | `FINTWIN_SESSION_SECRET` | a long random string, for example the output of `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
+| Name | Value |
+|---|---|
+| `FINTWIN_BASE_URL` | your Render address, no trailing slash |
+| `GITHUB_CLIENT_ID` | the Client ID from step 5 |
+| `GITHUB_CLIENT_SECRET` | the client secret from step 5 |
+| `FINTWIN_ARCHIVE_URL` | the Neon connection string from step 3 |
 
-Keep the two secrets out of the repository, chat messages and screenshots. If `FINTWIN_SESSION_SECRET` is left out the site still works, but everyone is signed out whenever it restarts.
+`FINTWIN_PUBLIC` and `FINTWIN_SESSION_SECRET` are set by the blueprint; leave them. Save, and let Render redeploy.
 
-If you skip step 3 and add only `FINTWIN_BASE_URL`, the site runs as a read-and-predict demonstration with no sign-in and no way to start a run.
+Never put these values in the repository, a chat message or a screenshot.
 
-## Step 5: push the code to the Space
+## Step 7: check it
 
-The Space is its own Git repository, separate from the GitHub one. `scripts/build_space.py` assembles what it needs into `build/space` (which is not part of the GitHub repository).
+1. Open the site. The Overview shows the reference runs; the footer says it is a public demonstration.
+2. Open **Run**. It asks you to sign in.
+3. Click **Sign in with GitHub**, approve, and you return signed in, with your login in the header.
+4. Start a small run. It finishes and shows as "yours" under **Experiments**.
+5. In a private browser window (not signed in), open the address of that run. It should say the run could not be found.
+6. In Render, use **Manual Deploy → Restart** (this wipes the disk), reopen the site and sign in. Your run should still be there. That confirms the Neon archive works.
+7. Open **Models**. It should say the models were trained on another machine and show how many site runs have been collected.
 
-```powershell
-python scripts/build_space.py
-cd build/space
-git init -b main
-git remote add space https://huggingface.co/spaces/yourname/fintwin
-git add .
-git commit -m "FinTwin public demonstration"
-git push --force space main
+## Day-to-day
+
+- **Updating the site:** push to GitHub; Render redeploys. Site runs and site-trained models come back from Neon.
+- **When retraining happens:** automatically, at 60 site runs and after every 25 more. The Models page then says the models describe this server.
+- **Seeing how full Neon is:** the Neon dashboard shows storage. FinTwin stops accepting runs at 20,000 archived runs, well inside the free 1 GB.
+
+## Changing the limits
+
+| What | Where |
+|---|---|
+| Workers, rate, duration per run; runs per day; how many may wait; predictions per minute | constants at the top of `backend/app/access.py` |
+| Site runs needed before the first retraining, and between retrainings | environment variables `FINTWIN_SITE_MIN_RUNS` (60) and `FINTWIN_RETRAIN_EVERY` (25) |
+| Maximum archived runs | `MAX_ARCHIVED_RUNS` in `backend/app/archive.py` |
+
+If you move to a larger paid instance, raise the caps and rerun the measurement before trusting higher rates.
+
+## Removing someone's data yourself
+
+People can do this themselves with "Delete my runs". To do it for them, run this in the Neon SQL editor, replacing the login, then restart the Render service:
+
+```sql
+DELETE FROM validation_experiments WHERE started_by = 'their-login';
+DELETE FROM experiment_runs WHERE started_by = 'their-login';
+DELETE FROM usage_log WHERE login = 'their-login';
 ```
 
-When Git asks for a password, use a Hugging Face access token with write permission (create one under **Settings → Access Tokens** on Hugging Face), not your account password. `--force` is needed only the first time, to replace the placeholder files the Space was created with.
-
-The Space page shows the build log. The first build takes several minutes. When it says **Running**, open the direct address.
-
-## Step 6: check it
-
-1. Open `https://yourname-fintwin.hf.space`. The Overview should show the recorded runs, and the footer should say it is a public demonstration.
-2. Open **Run**. It should ask you to sign in.
-3. Click **Sign in with GitHub**, approve, and you should return signed in, with your login name in the header.
-4. Start a small run. It should finish and appear under **Experiments → Mine**.
-5. Open **Validation** and run a check. Expect the measured CPU to differ from the prediction; that is the point of the page.
-
-## Updating the site later
-
-After changing code, or after retraining and refreshing `bundled/`:
-
-```powershell
-python scripts/build_space.py
-cd build/space
-git add -A
-git commit -m "Update"
-git push space main
-```
-
-`build_space.py` keeps the `.git` folder inside `build/space`, so the link to the Space survives a rebuild.
+To sign everyone out, change `FINTWIN_SESSION_SECRET` in Render.
 
 ## If something goes wrong
 
 | Symptom | Cause and fix |
 |---|---|
-| "Sign-in is not configured on this server" | One of `FINTWIN_BASE_URL`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` is missing. Add it and restart the Space |
+| "Sign-in is not configured on this server" | `FINTWIN_BASE_URL`, `GITHUB_CLIENT_ID` or `GITHUB_CLIENT_SECRET` is missing in Render |
 | GitHub says the redirect URI does not match | The callback URL in the GitHub app must be exactly `FINTWIN_BASE_URL` plus `/api/auth/callback` |
-| Signed in on the direct address but not inside the Hugging Face page | Expected. The Space page shows the site inside a frame, where browsers do not keep the sign-in cookie. Use and share the direct `hf.space` address |
 | "This sign-in link is not valid any more" | The sign-in was started more than ten minutes ago or in another browser. Start again from the site |
-| Push rejected for a large file | Run `python scripts/build_space.py` again and push from `build/space`, not from the project root |
-| The site is slow to open | It was asleep. Free Spaces sleep when idle |
-
-## Changing the limits
-
-The caps and allowances are constants at the top of `backend/app/access.py`: workers, rate and duration per run, runs per day, how many runs may wait, and predictions per minute. Change them, rebuild and push.
+| Runs disappear after the site sleeps | `FINTWIN_ARCHIVE_URL` is missing or wrong. Check the Render logs for "Archive" messages |
+| The site is slow to open | It was asleep. Free services sleep after 15 idle minutes |
+| A run takes much longer than its duration | The host is saturated; that is a real result on this hardware |
+| Render reports the service ran out of memory | Retraining is the tightest moment. Raise `FINTWIN_SITE_MIN_RUNS` to a very large number to switch automatic retraining off, and tell the developer |
+| The Models page still says "trained on another machine" after 60 runs | Retraining is queued behind runs, or the site-run data does not yet cover two scenarios and several loads. It tries again after the next batch |
 
 ## What this deployment is not
 
-- It is not a load-testing service. The caps keep runs far below the 600 TPS at which the recorded campaign saturated the database; those results are shown as recorded data.
-- It is not private. Anything a signed-in person runs is visible to all visitors as a run, without their name.
-- It has no administrator page. To remove someone's access, lower `RUNS_PER_DAY` or rotate `FINTWIN_SESSION_SECRET` (which signs everyone out).
+- **Not a load-testing service.** The caps keep runs far below the 600 TPS at which the recorded campaign saturated a laptop; those results are shown as recorded data.
+- **Not verified on the real services by the developer.** The image was built and exercised locally under Render's limits with a second PostgreSQL container standing in for Neon. The real GitHub round trip, Neon and Render themselves are first exercised by the steps above.
+- **No administrator page.** Limits and deletions are done as described above.

@@ -1,7 +1,7 @@
 import { useModels } from "../api/queries";
 import type { ModelCard } from "../api/types";
 import { TARGET_LABELS } from "../components/evidence";
-import { describeTraining } from "../components/Predicted";
+import { describeTraining, SiteTraining } from "../components/Predicted";
 import { PageIntro, Section } from "../components/Section";
 import { Command, EmptyState, ErrorState, Placeholder } from "../components/States";
 import { formatNumber, scenarioLabel } from "../lib/format";
@@ -131,7 +131,10 @@ export function Models() {
       <Intro />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-14">
         <Section title="Error on runs held back from training" note={describeTraining(first)}>
-          <ModelTable models={models.data} />
+          <SiteTraining model={first} />
+          <div className="mt-5">
+            <ModelTable models={models.data} />
+          </div>
           <p className="mt-3 max-w-[78ch] text-xs text-graphite">Typical miss is the mean absolute error. “Without a model” is the miss from predicting the requested rate for throughput, or the scenario’s average for everything else. “Between identical runs” is how much the same workload varies when repeated, which no model can beat.</p>
         </Section>
         <Section title="What the models have seen" note="Predictions for workloads outside these ranges are extrapolations.">

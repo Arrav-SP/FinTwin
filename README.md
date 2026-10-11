@@ -42,7 +42,9 @@ What you get is the author's data and models. Every page works at once, and you 
 
 ## Public website
 
-FinTwin can be published as a free public site where anyone can read the results and predict, and people signed in with GitHub can run small, capped workloads. The step-by-step guide is [docs/DEPLOY.md](docs/DEPLOY.md). Public mode is off unless `FINTWIN_PUBLIC=true` is set; a server on your own machine is unrestricted.
+FinTwin can be published as a free public site (Render for the container, Neon for lasting storage, GitHub for sign-in). Anyone can read the reference runs and predict. People who sign in can run small, capped workloads, see only their own runs, and their measurements are used, without their name, to retrain the site's models. The step-by-step guide is [docs/DEPLOY.md](docs/DEPLOY.md).
+
+Public mode is off unless `FINTWIN_PUBLIC=true` is set. A server on your own machine is unrestricted.
 
 ## Setup without Docker for the application (Windows PowerShell, from the project root)
 
@@ -101,7 +103,7 @@ python -m pytest
 npm --prefix web test
 ```
 
-The backend suite has 120 cases; fifteen need PostgreSQL running and seeded, and `tests/test_phase1.py` changes account balances. The interface has 82 tests.
+The backend suite has 151 cases; about thirty need PostgreSQL running and seeded, and `tests/test_phase1.py` changes account balances. The interface has 89 tests.
 
 ## Layout
 
@@ -116,6 +118,6 @@ The backend suite has 120 cases; fifteen need PostgreSQL running and seeded, and
 | `bundled/` | Shipped with the project: the trained models, the campaign, validation and study records, and a dump of the database |
 | `artifacts/` | Working copy of models and results on this machine (not in version control) |
 | `Dockerfile`, `docker-compose.yml` | The database service, and the application service under the `app` profile |
-| `deploy/space/`, `scripts/build_space.py` | The all-in-one image for the public website, and the script that assembles the folder pushed to the host |
+| `deploy/public/`, `render.yaml` | The all-in-one image for the public website and the Render blueprint that deploys it |
 
 `frontend/` holds the first, plain HTML interface. It is no longer served.
