@@ -1,8 +1,15 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiGet, apiPost } from "./client";
-import type { Assessment, Experiment, ExperimentDetailResponse, Job, JobRequest, LatencyBreakdown, ModelCard, Prediction, ScenarioCatalogue, Sweep, SweepParameter, SystemStatus, Validation, ValidationSummary, WorkloadInput } from "./types";
+import type { Assessment, Experiment, ExperimentDetailResponse, Job, JobRequest, LatencyBreakdown, ModelCard, Prediction, ScenarioCatalogue, Session, Sweep, SweepParameter, SystemStatus, Validation, ValidationSummary, WorkloadInput } from "./types";
 
 export const useSystemStatus = () => useQuery({ queryKey: ["system-status"], queryFn: () => apiGet<SystemStatus>("/api/system/status"), refetchInterval: 15_000 });
+/** Who this browser is signed in as, if anyone, and what it may run. */
+export const useSession = () => useQuery({ queryKey: ["session"], queryFn: () => apiGet<Session>("/api/auth/me"), staleTime: 30_000, retry: false });
+export const useSignOut = () => {
+  const queryClient = useQueryClient();
+  return useMutation({ mutationFn: () => apiPost<void>("/api/auth/logout", {}), onSuccess: () => queryClient.invalidateQueries() });
+};
+export const SIGN_IN_PATH = "/api/auth/login";
 export const useExperiments = () => useQuery({ queryKey: ["experiments"], queryFn: () => apiGet<Experiment[]>("/api/experiments?limit=500") });
 /** "current" keeps only checks predicted by the models now on disk. */
 export type ValidationScope = "current" | "all";

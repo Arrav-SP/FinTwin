@@ -4,14 +4,16 @@ from pathlib import Path
 from datetime import datetime
 from typing import Any, Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from . import access
+from .auth import router as auth_router
 from .bundled import install_bundled
-from .database import check_connection, engine
+from .database import check_connection, engine, initialize_schema
 from .jobs import JobManager
 from .ml.dataset import INTERRUPTED_FACTOR
 from .telemetry import TelemetryCollector
@@ -20,10 +22,9 @@ from .ui import mount_ui
 from .validation import get_validation, list_validations, made_since, run_validation, validation_summary
 from .workload import Scenario, WorkloadConfig, WorkloadRunner
 from .workload.config import DEFAULT_MIXES
+from .limits import MAX_DURATION_SECONDS, MAX_TARGET_TPS
 from .workload.config import MAX_CONCURRENCY
 
-MAX_TARGET_TPS = 1000.0
-MAX_DURATION_SECONDS = 600.0
 
 APP_ROOT = Path(__file__).resolve().parents[2]
 WEB_ROOT = APP_ROOT / "web" / "dist"
@@ -31,6 +32,16 @@ WEB_ROOT = APP_ROOT / "web" / "dist"
 app = FastAPI(title="FinTwin API", version="8.0.0")
 # A fresh copy of the project has no trained models; install the ones shipped with it.
 install_bundled()
+app.include_router(auth_router)
+
+
+@app.on_event("startup")
+def _bring_schema_up_to_date() -> None:
+    """Add any table or column a newer version of the code expects. The schema file is idempotent."""
+    try:
+        initialize_schema()
+    except SQLAlchemyError:
+        pass  # the database may not be up yet; /api/health reports that
 jobs = JobManager()
 
 
@@ -126,7 +137,7 @@ def system_status() -> dict[str, Any]:
 
 
 @app.get("/api/experiments")
-def experiments(limit: int = 100, include_interrupted: bool = False) -> list[dict[str, Any]]:
+def experiments(request: Request, limit: int = 100, include_interrupted: bool = False) -> list[dict[str, Any]]:
     """Recent runs. A run that lasted several times its requested duration was suspended with the
     machine; its figures measure the pause, so it is listed only on request."""
     try:
@@ -135,13 +146,14 @@ def experiments(limit: int = 100, include_interrupted: bool = False) -> list[dic
                 SELECT e.experiment_id, e.scenario, e.configuration, e.started_at, e.completed_at, e.status,
                        e.actual_tps, e.average_latency_ms, e.p50_latency_ms, e.p95_latency_ms, e.p99_latency_ms,
                        e.successful_operations, e.failed_operations, s.host_cpu_avg_percent, s.lock_wait_count_max,
-                       s.telemetry_sample_count
+                       s.telemetry_sample_count,
+                       COALESCE(e.started_by = :login, FALSE) AS mine
                 FROM experiment_runs e
                 LEFT JOIN experiment_summaries s USING (experiment_id)
                 WHERE :include_interrupted OR NOT COALESCE(
                     EXTRACT(EPOCH FROM e.completed_at - e.started_at) > :factor * (e.configuration->>'duration_seconds')::float, FALSE)
                 ORDER BY e.started_at DESC LIMIT :limit
-            """), {"limit": max(1, min(limit, 500)), "include_interrupted": include_interrupted, "factor": INTERRUPTED_FACTOR}).mappings().all()
+            """), {"limit": max(1, min(limit, 500)), "include_interrupted": include_interrupted, "factor": INTERRUPTED_FACTOR, "login": access.current_login(request)}).mappings().all()
         result = []
         for row in rows:
             record = dict(row)
@@ -173,6 +185,7 @@ def experiment_detail(experiment_id: str) -> dict[str, Any]:
                 FROM validation_experiments WHERE actual_experiment_id = :id ORDER BY created_at DESC
             """), {"id": experiment_id}).mappings().all()
         record = dict(experiment)
+        record.pop("started_by", None)  # who ran it is shown to nobody else
         record["configuration"] = _configuration(record["configuration"])
         return {"experiment": record, "telemetry": [dict(item) for item in telemetry], "validations": [dict(item) for item in validations]}
     except HTTPException:
@@ -181,7 +194,7 @@ def experiment_detail(experiment_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=503, detail="Database unavailable") from exc
 
 
-@app.post("/api/predictions")
+@app.post("/api/predictions", dependencies=[Depends(access.limit_predictions)])
 def create_prediction(request: WorkloadRequest) -> dict[str, Any]:
     try:
         from .ml.predict import predict_performance
@@ -195,7 +208,7 @@ def create_prediction(request: WorkloadRequest) -> dict[str, Any]:
         raise HTTPException(status_code=503, detail="ML prediction is unavailable") from exc
 
 
-@app.post("/api/what-if")
+@app.post("/api/what-if", dependencies=[Depends(access.limit_predictions)])
 def what_if(request: WhatIfRequest) -> dict[str, Any]:
     try:
         from .what_if import compare_workloads
@@ -250,6 +263,8 @@ def validation_detail(validation_id: str) -> dict:
 
 @app.post("/api/validation", status_code=201)
 def create_validation(request: ValidationRequest) -> dict:
+    if access.config().public:
+        raise HTTPException(status_code=403, detail="On this server, validations are started from the Validation page after signing in.")
     try:
         config = WorkloadConfig(scenario=request.scenario, concurrency=request.concurrency, target_tps=request.target_tps, duration_seconds=request.duration_seconds, seed=request.seed)
         return run_validation(config, telemetry_interval=request.telemetry_interval)
@@ -275,7 +290,7 @@ def models() -> list[dict[str, Any]]:
     return describe_models(APP_ROOT / "artifacts" / "models")
 
 
-@app.post("/api/what-if/sweep")
+@app.post("/api/what-if/sweep", dependencies=[Depends(access.limit_predictions)])
 def what_if_sweep(request: SweepRequest) -> dict[str, Any]:
     try:
         from .what_if import sensitivity_analysis
@@ -315,14 +330,47 @@ def _run_validation_job(config: WorkloadConfig, telemetry_interval: float) -> di
     return jsonable_encoder({"validation_id": record["validation_id"], "experiment_id": record["actual_experiment_id"]})
 
 
+def claim_run(experiment_id: str | None, login: str) -> None:
+    """Record which signed-in person started a run."""
+    if experiment_id:
+        with engine.begin() as connection:
+            connection.execute(text("UPDATE experiment_runs SET started_by = :login WHERE experiment_id = :id"), {"login": login, "id": experiment_id})
+
+
+def _authorize_run(http: Request, request: JobRequest) -> str | None:
+    """On a public server only a signed-in person may run, within the caps and their daily allowance."""
+    if not access.config().public:
+        return None
+    login = access.current_login(http)
+    if login is None:
+        raise HTTPException(status_code=401, detail="Sign in with GitHub to run a workload on this server.")
+    workload = request.workload
+    access.check_public_caps(workload.concurrency, workload.target_tps, workload.duration_seconds)
+    if access.runs_used(login) >= access.RUNS_PER_DAY:
+        raise HTTPException(status_code=429, detail=f"You have used today's {access.RUNS_PER_DAY} runs. The allowance refills over the next 24 hours.")
+    if jobs.waiting() >= access.MAX_WAITING:
+        raise HTTPException(status_code=429, detail="Several runs are already waiting. Try again in a minute.")
+    return login
+
+
 @app.post("/api/jobs", status_code=202)
-def submit_job(request: JobRequest) -> dict[str, Any]:
+def submit_job(request: JobRequest, http: Request) -> dict[str, Any]:
+    login = _authorize_run(http, request)
     try:
         config = request.config()
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     work = _run_workload_job if request.kind == "workload" else _run_validation_job
-    return jobs.submit(request.kind, request.model_dump(mode="json"), lambda: work(config, request.telemetry_interval))
+
+    def run() -> dict[str, Any]:
+        result = work(config, request.telemetry_interval)
+        if login:
+            claim_run(result.get("experiment_id"), login)
+        return result
+
+    if login:
+        access.record_run(login, request.kind)
+    return jobs.submit(request.kind, request.model_dump(mode="json"), run)
 
 
 @app.get("/api/jobs")

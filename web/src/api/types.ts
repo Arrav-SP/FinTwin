@@ -10,6 +10,24 @@ export interface SystemStatus {
   model_artifacts: number;
 }
 
+export interface RunLimits {
+  max_concurrency: number;
+  max_target_tps: number;
+  max_duration_seconds: number;
+}
+
+/** What this browser may do. A private server is unrestricted; a public one asks for a sign-in before running. */
+export interface Session {
+  public: boolean;
+  sign_in_available: boolean;
+  signed_in: boolean;
+  login: string | null;
+  can_run: boolean;
+  run_limits: RunLimits;
+  runs_per_day: number | null;
+  runs_left: number | null;
+}
+
 export interface WorkloadConfiguration {
   concurrency?: number;
   target_tps?: number;
@@ -39,6 +57,8 @@ export interface Experiment {
   host_cpu_avg_percent: Numeric;
   lock_wait_count_max: Numeric;
   telemetry_sample_count: number | null;
+  /** True when the signed-in person started this run. The server never says who else did. */
+  mine?: boolean;
 }
 
 export const TARGETS = ["average_latency_ms", "p95_latency_ms", "actual_tps", "host_cpu_avg_percent", "lock_wait_count_max"] as const;
@@ -157,7 +177,7 @@ export interface ModelCard {
 
 export interface ScenarioCatalogue {
   scenarios: { scenario: string; operation_mix: Record<string, number> }[];
-  limits: { max_concurrency: number; max_target_tps: number; max_duration_seconds: number };
+  limits: RunLimits;
 }
 
 /** What a person chooses when describing a workload. */

@@ -33,6 +33,11 @@ class JobManager:
             job = self._jobs.get(job_id)
             return dict(job) if job else None
 
+    def waiting(self) -> int:
+        """Jobs queued or running."""
+        with self._lock:
+            return sum(job["status"] in ("queued", "running") for job in self._jobs.values())
+
     def list(self) -> list[dict[str, Any]]:
         with self._lock:
             return [dict(job) for job in reversed(self._jobs.values())]

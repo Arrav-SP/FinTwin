@@ -40,6 +40,10 @@ What you get is the author's data and models. Every page works at once, and you 
 - The models were trained on the author's laptop. On another machine, and inside a container, the measured latency and especially host CPU will differ from the predictions. To get models for your own machine, run the two campaigns and `train_models.py` (see below).
 - The server listens on `127.0.0.1` only. The API has no authentication and is not meant to be exposed.
 
+## Public website
+
+FinTwin can be published as a free public site where anyone can read the results and predict, and people signed in with GitHub can run small, capped workloads. The step-by-step guide is [docs/DEPLOY.md](docs/DEPLOY.md). Public mode is off unless `FINTWIN_PUBLIC=true` is set; a server on your own machine is unrestricted.
+
 ## Setup without Docker for the application (Windows PowerShell, from the project root)
 
 Use this for development. PostgreSQL still runs in Docker; `docker compose up -d` starts only the database.
@@ -97,7 +101,7 @@ python -m pytest
 npm --prefix web test
 ```
 
-The backend suite has 93 cases; thirteen need PostgreSQL running and seeded, and `tests/test_phase1.py` changes account balances. The interface has 73 tests.
+The backend suite has 120 cases; fifteen need PostgreSQL running and seeded, and `tests/test_phase1.py` changes account balances. The interface has 82 tests.
 
 ## Layout
 
@@ -112,5 +116,6 @@ The backend suite has 93 cases; thirteen need PostgreSQL running and seeded, and
 | `bundled/` | Shipped with the project: the trained models, the campaign, validation and study records, and a dump of the database |
 | `artifacts/` | Working copy of models and results on this machine (not in version control) |
 | `Dockerfile`, `docker-compose.yml` | The database service, and the application service under the `app` profile |
+| `deploy/space/`, `scripts/build_space.py` | The all-in-one image for the public website, and the script that assembles the folder pushed to the host |
 
 `frontend/` holds the first, plain HTML interface. It is no longer served.

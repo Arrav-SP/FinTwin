@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router";
-import { useSystemStatus } from "../api/queries";
+import { SIGN_IN_PATH, useSession, useSignOut, useSystemStatus } from "../api/queries";
 import type { ComponentState } from "../api/types";
 import { Segmented } from "../components/Segmented";
 import { applyTheme, readTheme, type Theme } from "../lib/theme";
@@ -62,6 +62,40 @@ function SystemStatus() {
   );
 }
 
+const QUIET_LINK = "text-graphite underline decoration-rule-strong underline-offset-4 hover:text-paper hover:decoration-paper";
+
+/** Shown only on a public server: who is signed in, or the way to sign in. */
+function Account() {
+  const session = useSession().data;
+  const signOut = useSignOut();
+  if (!session?.public) return null;
+  if (session.signed_in) {
+    return (
+      <p className="flex items-center gap-3 whitespace-nowrap text-xs text-graphite">
+        <span className="text-paper">{session.login}</span>
+        <button type="button" onClick={() => signOut.mutate()} disabled={signOut.isPending} className={`cursor-pointer border-0 bg-transparent p-0 ${QUIET_LINK}`}>
+          Sign out
+        </button>
+      </p>
+    );
+  }
+  if (!session.sign_in_available) return null;
+  return (
+    // target _top: a host may show the site inside a frame, where a sign-in cookie would not be kept.
+    <a href={SIGN_IN_PATH} target="_top" className={`whitespace-nowrap text-xs ${QUIET_LINK}`}>
+      Sign in
+    </a>
+  );
+}
+
+function About() {
+  const session = useSession().data;
+  if (session?.public) {
+    return <p className="max-w-[86ch]">Public demonstration on shared hardware. The data is synthetic, the models were trained on a different machine, and runs made here are erased when the server restarts.</p>;
+  }
+  return <p>A test bench for PostgreSQL under synthetic banking workloads. Every figure is measured or marked as predicted.</p>;
+}
+
 const THEMES: { key: Theme; label: string }[] = [
   { key: "dark", label: "Dark" },
   { key: "light", label: "Light" },
@@ -100,8 +134,9 @@ export function AppShell() {
               </NavLink>
             ))}
           </nav>
-          <div className="ml-auto shrink-0">
+          <div className="ml-auto flex shrink-0 items-center gap-5">
             <SystemStatus />
+            <Account />
           </div>
         </div>
       </header>
@@ -110,7 +145,7 @@ export function AppShell() {
       </main>
       <footer className="border-t border-rule">
         <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-x-8 gap-y-3 px-5 py-5 text-xs text-graphite sm:px-8">
-          <p>A test bench for PostgreSQL under synthetic banking workloads. Every figure is measured or marked as predicted.</p>
+          <About />
           <ThemeChoice />
         </div>
       </footer>

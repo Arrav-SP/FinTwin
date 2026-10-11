@@ -1,10 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useState } from "react";
-import { useJob, useJobs, useScenarios, useSubmitJob } from "../api/queries";
-import type { Job, JobKind, WorkloadInput } from "../api/types";
+import { SIGN_IN_PATH, useJob, useJobs, useScenarios, useSession, useSubmitJob } from "../api/queries";
+import type { Job, JobKind, RunLimits, WorkloadInput } from "../api/types";
 import { scenarioLabel } from "../lib/format";
 import { jobProgress } from "../lib/jobs";
-import { ErrorState, Placeholder } from "./States";
+import { EmptyState, ErrorState, Placeholder } from "./States";
 import { DEFAULT_WORKLOAD, WorkloadForm } from "./WorkloadForm";
 
 const isActive = (job: Job | undefined) => job?.status === "queued" || job?.status === "running";
@@ -38,6 +38,28 @@ function Progress({ job }: { job: Job }) {
   );
 }
 
+const LINK = "text-paper underline decoration-rule-strong underline-offset-4 hover:decoration-paper";
+
+/** On a public server a visitor who is not signed in sees why, not a form the server would refuse. */
+function SignInFirst({ available, limits }: { available: boolean; limits: RunLimits }) {
+  return (
+    <EmptyState title="Sign in to run a workload here">
+      <p className="max-w-[62ch]">
+        Anyone can read the recorded runs and use Predict and What if. Running a workload loads the shared database, so it needs a sign-in and is limited to {limits.max_concurrency} workers, {limits.max_target_tps} TPS and {limits.max_duration_seconds} seconds.
+      </p>
+      <p className="mt-4">
+        {available ? (
+          <a href={SIGN_IN_PATH} target="_top" className={LINK}>
+            Sign in with GitHub
+          </a>
+        ) : (
+          "Sign-in has not been set up on this server."
+        )}
+      </p>
+    </EmptyState>
+  );
+}
+
 /**
  * Describe a workload, start it as a background job, and follow it to its outcome.
  * A job that is still running when the page is reopened is picked up again.
@@ -46,6 +68,7 @@ export function JobRunner({ kind, action, working, note, done }: { kind: JobKind
   const queryClient = useQueryClient();
   const scenarios = useScenarios();
   const jobs = useJobs();
+  const session = useSession();
   const submit = useSubmitJob();
   const [workload, setWorkload] = useState<WorkloadInput>(DEFAULT_WORKLOAD);
   const [startedId, setStartedId] = useState<string>();
@@ -56,11 +79,18 @@ export function JobRunner({ kind, action, working, note, done }: { kind: JobKind
 
   const finished = job?.status === "completed" || job?.status === "failed";
   useEffect(() => {
-    if (finished) for (const key of ["experiments", "validations", "validation-summary", "jobs"]) queryClient.invalidateQueries({ queryKey: [key] });
+    if (finished) for (const key of ["experiments", "validations", "validation-summary", "jobs", "session"]) queryClient.invalidateQueries({ queryKey: [key] });
   }, [finished, queryClient]);
 
-  if (scenarios.isPending) return <Placeholder className="h-40 w-full" label="Loading scenarios" />;
+  if (scenarios.isPending || session.isPending) return <Placeholder className="h-40 w-full" label="Loading scenarios" />;
   if (scenarios.isError) return <ErrorState title="The form could not be prepared" message={scenarios.error.message} onRetry={() => scenarios.refetch()} />;
+
+  // A server that does not answer the session question is a private one: no restrictions.
+  const restricted = session.data?.public === true ? session.data : undefined;
+  if (restricted && !restricted.signed_in) return <SignInFirst available={restricted.sign_in_available} limits={restricted.run_limits} />;
+  const catalogue = restricted ? { ...scenarios.data, limits: restricted.run_limits } : scenarios.data;
+  const spent = restricted?.runs_left === 0;
+  const allowance = !restricted ? "" : spent ? ` You have used today's ${restricted.runs_per_day} runs; the allowance refills over the next 24 hours.` : ` ${restricted.runs_left} of ${restricted.runs_per_day} runs left today.`;
 
   return (
     <>
@@ -70,12 +100,15 @@ export function JobRunner({ kind, action, working, note, done }: { kind: JobKind
           submit.mutate({ kind, workload }, { onSuccess: (created) => setStartedId(created.job_id) });
         }}
       >
-        <WorkloadForm id={kind} value={workload} onChange={setWorkload} catalogue={scenarios.data} />
+        <WorkloadForm id={kind} value={workload} onChange={setWorkload} catalogue={catalogue} />
         <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
-          <button type="submit" className="primary" disabled={busy}>
+          <button type="submit" className="primary" disabled={busy || spent}>
             {busy ? working : action}
           </button>
-          <p className="max-w-[52ch] text-xs text-graphite">{note}</p>
+          <p className="max-w-[52ch] text-xs text-graphite">
+            {note}
+            {allowance}
+          </p>
         </div>
       </form>
       <div className="mt-10" aria-live="polite">

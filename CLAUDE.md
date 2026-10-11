@@ -27,7 +27,7 @@ A database-performance test bench, not a personal-finance or LLM app. There is n
 | `frontend/` | Old UI (plain HTML/JS). Retired in F4: no longer served by anything, files left on disk. Delete only if the user asks |
 | `web/` | New UI (F1, redesigned 2026-10-10). React 19 + TypeScript + Vite 8 + Tailwind 4 + TanStack Query + React Router 8 + Recharts. Read `web/DESIGN.md` before touching it. Tokens in `src/styles.css`; top-bar shell in `src/app/`; typed API in `src/api/`; pages Overview, Experiments, run detail (`/experiments/:id`, includes the advisor), Run, Predict, What if, Validation, Models (F2 and F3, 2026-10-10). There is no separate Advisor page and no two-workload comparison; the old UI's features are otherwise covered. Rule: measured = filled signal colour, predicted = hollow dashed. Serif Newsreader for statements, IBM Plex Sans for the interface. No cards, no sidebar, no icons |
 | `scripts/` | CLI entry points (seed, run_workload, train_models, what_if, validate_prediction, run_benchmark, ...) |
-| `tests/` | 16 modules, 93 cases; 13 need PostgreSQL (`test_phase1.py`, `test_m1_database.py`, `test_m2_database.py`, one case in `test_release.py`) |
+| `tests/` | 17 modules, 120 cases; 15 need PostgreSQL |
 | `artifacts/` | git-ignored: 5 models (`.joblib` + `.json`), `validation.json`, `benchmark.csv`, sweep CSVs |
 | `docs/` | `RESULTS.md` (current results), `FRONTEND.md` (current UI). `PHASE*` and `UI_RESULTS.md` are marked historical |
 
@@ -126,6 +126,21 @@ Tests in `tests/test_release.py`. Backend suite: 93 passed.
 - Verified 2026-10-11 with a throwaway project (`-p fintwintest`, ports 55432/58000): fresh volume restored, 278 runs listed, 5 models, 16 current validations, a validation job ran. In the container host CPU read 2.2% against 16.7% predicted: the models are specific to the laptop outside Docker.
 - A backup from before this work: `..\FinTwin_backup_2026-10-10\db_dump_before_removing_interrupted_runs.dump` (custom format).
 - Stale after this change, not yet corrected: report v2 section 15.4 says only PostgreSQL is containerised, and section 16 lists containerising the application as future work.
+
+## Public website (built 2026-10-11, not yet deployed)
+
+Tests in `tests/test_public.py`, `tests/test_release.py`, `web/src/pages/Public.test.tsx`. Backend 120 passed, interface 82 passed. User guide: `docs/DEPLOY.md`.
+
+- Off by default. `FINTWIN_PUBLIC=true` turns it on (`backend/app/config.py`). Other settings: `FINTWIN_BASE_URL`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `FINTWIN_SESSION_SECRET`, `FINTWIN_DEV_LOGIN`.
+- `backend/app/access.py`: caps (16 workers, 100 TPS, 10 s), 10 runs per person per day (`usage_log` table), at most 5 jobs waiting, 60 predictions a minute per visitor and 900 for everyone, HMAC-signed session cookie, GitHub OAuth without scopes. `backend/app/auth.py`: `/api/auth/me`, `/login`, `/callback`, `/logout`. Tests replace `access.config` to switch modes.
+- Public rules: anyone reads and predicts; `POST /api/jobs` needs a session (401 otherwise); the synchronous `POST /api/validation` is closed (403). `experiment_runs.started_by` holds the GitHub login and is never returned; the list returns `mine` instead.
+- `FINTWIN_DEV_LOGIN` signs in without GitHub but only when the base URL host is localhost/127.0.0.1. Keep that guard.
+- Interface: `useSession`; header shows Sign in or the login with Sign out (public only); `JobRunner` shows a sign-in notice or the capped form with runs left; Experiments has a Mine filter; the footer states it is a public demonstration.
+- The API now runs `initialize_schema()` on startup (errors swallowed), so new columns appear on existing databases.
+- Hosting target: Hugging Face Spaces, Docker SDK, port 7860. `deploy/space/` holds the all-in-one Dockerfile (postgres:16-bookworm plus Python, user 1000, database restored at build time), `start.sh` and the Space README. `python scripts/build_space.py` assembles `build/space` (git-ignored via `build/`), splits the dump into 8 MB parts, keeps `build/space/.git`.
+- Verified locally 2026-10-11 by building and running the image: starts in about 4 s, visitor gets 401 on jobs and 200 on predictions, dev sign-in works, a capped validation ran and showed under Mine, allowance dropped to 9. Not verified: the real GitHub round trip and the behaviour on Spaces itself (needs the user's accounts). Screenshots were unavailable; pages were checked through the DOM.
+- Dropped from the plan: retraining models on the Space. Its disk is wiped on restart, so there is no "once"; the footer and the Validation page state the mismatch instead.
+- The user creates the Space and the GitHub OAuth app and pushes `build/space` themselves. Never enter their secrets or push for them.
 
 ## Documents
 
