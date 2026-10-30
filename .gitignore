@@ -37,3 +37,18 @@ temp/
 .mypy_cache/
 .ruff_cache/
 
+
+# editor, OS and assistant files
+.claude/
+desktop.ini
+*.pyc
+.pytest_cache/
+
+/*.docx
+/*.pdf
+/EXPLANATION.md
+/FINTWIN_*
+/FinTwin_*
+PPTs/
+frontend/
+
