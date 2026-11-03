@@ -12,6 +12,25 @@ It is not a banking application. All data is synthetic, there are no user accoun
 4. **Predict.** A workload is predicted without running it, with a warning when it lies outside what the models were trained on.
 5. **Validate.** The prediction is stored first, then the same workload is run and the two are compared.
 
+## How it works
+
+```mermaid
+flowchart LR
+    R["Workload runner<br/>scenario, workers, target TPS,<br/>burstiness, account skew"] -->|banking operations| DB[("PostgreSQL 16<br/>synthetic banking tables")]
+    R -->|"latency, queue wait,<br/>outcome per operation"| EV[("workload_events")]
+    DB -.->|"pg_stat_*, pg_locks"| C["Telemetry collector<br/>1 sample per second,<br/>plus host CPU and memory"]
+    C --> TS[("telemetry_samples")]
+    EV --> SU[("experiment_summaries<br/>one row per run")]
+    TS --> SU
+    SU --> TR["Training<br/>LR / RF / GBM per metric,<br/>CV holding out load settings"]
+    TR --> M[("trained models")]
+    M --> P["Predict and What if<br/>from the configuration alone"]
+    P -->|"prediction stored first"| V["Validation<br/>run the same workload<br/>and compare"]
+    V --> R
+```
+
+The FastAPI server (`backend/app/`) exposes each step under `/api` and serves the React interface in `web/`. Table definitions are in `database/schema.sql`.
+
 ## Current results
 
 Measured on one development machine with runs of eight seconds. Details and limits are in [docs/RESULTS.md](docs/RESULTS.md).
